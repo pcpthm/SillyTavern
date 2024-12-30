@@ -8,6 +8,7 @@ import { jsonParser } from '../express-common.js';
 
 export const SECRETS_FILE = 'secrets.json';
 export const SECRET_KEYS = {
+    GLHF: 'api_key_glhf',
     NEBIUS: 'api_key_nebius',
     XAI: 'api_key_xai',
     HYPERBOLIC: 'api_key_hyperbolic',

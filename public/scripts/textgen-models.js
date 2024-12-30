@@ -65,6 +65,32 @@ const OPENROUTER_PROVIDERS = [
     'Reflection',
 ];
 
+export async function loadGLHFModels(data) {
+    if (!Array.isArray(data)) {
+        console.error('Invalid GLHF models data', data);
+        return;
+    }
+
+    const select = $('#glhf_model_select');
+    select.empty();
+
+    if (!data.find(x => x.id === textgen_settings.glhf_model)) {
+        const option = document.createElement('option');
+        option.value = textgen_settings.glhf_model;
+        option.text = textgen_settings.glhf_model;
+        option.selected = true;
+        select.append(option);
+    }
+
+    for (const model of data) {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.text = model.id;
+        option.selected = model.id === textgen_settings.glhf_model;
+        select.append(option);
+    }
+}
+
 export async function loadNebiusModels(data) {
     if (!Array.isArray(data)) {
         console.error('Invalid Nebius models data', data);
@@ -581,6 +607,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function onGLHFModelChange() {
+    const modelId = String($('#glhf_model').val());
+    textgen_settings.glhf_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
+function onGLHFModelSelect() {
+    const modelId = String($('#glhf_model_select').val());
+    $('#glhf_model').val(modelId);
+    textgen_settings.glhf_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onNebiusModelSelect() {
     const modelId = String($('#nebius_model').val());
     textgen_settings.nebius_model = modelId;
@@ -949,6 +988,8 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#glhf_model').on('change', onGLHFModelChange);
+    $('#glhf_model_select').on('change', onGLHFModelSelect);
     $('#nebius_model').on('change', onNebiusModelSelect);
     $('#xai_model').on('change', onXAIModelSelect);
     $('#hyperbolic_model').on('change', onHyperbolicModelSelect);

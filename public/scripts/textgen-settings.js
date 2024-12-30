@@ -19,6 +19,7 @@ import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, getTextTokens, tokenizers } from
 import { getSortableDelay, onlyUnique, arraysEqual } from './utils.js';
 
 export const textgen_types = {
+    GLHF: 'glhf',
     NEBIUS: 'nebius',
     XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
@@ -41,6 +42,7 @@ export const textgen_types = {
 };
 
 const {
+    GLHF,
     NEBIUS,
     XAI,
     HYPERBOLIC,
@@ -111,6 +113,7 @@ const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let GLHF_SERVER = 'https://glhf.chat/api/openai/v1';
 let NEBIUS_SERVER = 'https://api.studio.nebius.ai/v1';
 let XAI_SERVER = 'https://api.x.ai/v1';
 let HYPERBOLIC_SERVER = 'https://api.hyperbolic.xyz/v1';
@@ -201,6 +204,7 @@ const settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    glhf_model: 'hf:mistralai/Mistral-7B-Instruct-v0.3',
     nebius_model: 'meta-llama/Meta-Llama-3.1-70B-Instruct',
     xai_model: 'grok-beta',
     hyperbolic_model: 'meta-llama/Meta-Llama-3.1-405B-Instruct',
@@ -330,6 +334,8 @@ export function validateTextGenUrl() {
 
 export function getTextGenServer() {
     switch (settings.type) {
+        case GLHF:
+            return GLHF_SERVER;
         case NEBIUS:
             return NEBIUS_SERVER;
         case XAI:
@@ -530,6 +536,7 @@ export function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#glhf_model').val(settings.glhf_model);
     $('#nebius_model').val(settings.nebius_model);
     $('#xai_model').val(settings.xai_model);
     $('#hyperbolic_model').val(settings.hyperbolic_model);
@@ -1051,6 +1058,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (settings.type) {
+        case GLHF:
         case NEBIUS:
         case XAI:
         case HYPERBOLIC:
@@ -1158,6 +1166,8 @@ function toIntArray(string) {
 
 export function getTextGenModel() {
     switch (settings.type) {
+        case GLHF:
+            return settings.glhf_model;
         case NEBIUS:
             return settings.nebius_model;
         case XAI:
@@ -1220,7 +1230,7 @@ function isDynamicTemperatureSupported() {
 }
 
 function getLogprobsNumber() {
-    if (settings.type === VLLM || settings.type === INFERMATICAI) {
+    if (settings.type === GLHF || settings.type === VLLM || settings.type === INFERMATICAI) {
         return 5;
     }
 
@@ -1435,6 +1445,7 @@ export function getTextGenGenerationData(finalPrompt, maxTokens, isImpersonate, 
     }
 
     switch (settings.type) {
+        case GLHF:
         case NEBIUS:
         case XAI:
         case HYPERBOLIC:

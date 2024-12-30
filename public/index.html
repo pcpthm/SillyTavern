@@ -1235,7 +1235,7 @@
                                         <div class="fa-solid fa-circle-info opacity50p" title="Customize displayed samplers or add custom samplers." data-i18n="[title]Customize displayed samplers or add custom samplers."></div>
                                     </small>
                                 </div>
-                                <div data-tg-type="nebius, xai, hyperbolic, mancer, vllm, aphrodite, tabby, infermaticai" class="flex-container flexFlowColumn alignitemscenter flexBasis100p flexGrow flexShrink gap0">
+                                <div data-tg-type="glhf, nebius, xai, hyperbolic, mancer, vllm, aphrodite, tabby, infermaticai" class="flex-container flexFlowColumn alignitemscenter flexBasis100p flexGrow flexShrink gap0">
                                     <small data-i18n="Multiple swipes per generation">Multiple swipes per generation</small>
                                     <input type="number" id="n_textgenerationwebui" class="text_pole textAlignCenter" min="1" value="1" step="1" />
                                 </div>
@@ -2222,6 +2222,7 @@
                                     <option value="dreamgen">DreamGen</option>
                                     <option value="featherless">Featherless</option>
                                     <option value="generic" data-i18n="Generic (OpenAI-compatible) [LM Studio, LiteLLM, etc.]">Generic (OpenAI-compatible) [LM Studio, LiteLLM, etc.]</option>
+                                    <option value="glhf">glhf.chat</option>
                                     <option value="huggingface">HuggingFace (Inference Endpoint)</option>
                                     <option value="hyperbolic">Hyperbolic</option>
                                     <option value="infermaticai">InfermaticAI</option>
@@ -2237,6 +2238,22 @@
                                     <option value="vllm">vLLM</option>
                                     <option value="xai">xAI</option>
                                 </select>
+                            </div>
+                            <div data-tg-type="glhf" class="flex-container flexFlowColumn">
+                                <h4>glhf.chat API Key</h4>
+                                <div class="flex-container">
+                                    <input id="api_key_glhf_tg" name="api_key_glhf" class="text_pole flex1" type="text" autocomplete="off">
+                                    <div title="Clear your API key" class="menu_button fa-solid fa-circle-xmark clear-api-key" data-key="api_key_glhf"></div>
+                                </div>
+                                <div>
+                                    <h4>Enter a Custom Model ID</h4>
+                                    <input list="glhf_model_fill" id="glhf_model" class="text_pole wide100p" value="hf:mistralai/Mistral-7B-Instruct-v0.3" autocomplete="off">
+                                    <datalist id="glhf_model_fill" class="text_pole"></datalist>
+                                </div>
+                                <h4 data-i18n="Available Models">Available Models</h4>
+                                <div class="flex-container">
+                                    <select id="glhf_model_select" class="text_pole"></select>
+                                </div>
                             </div>
                             <div data-tg-type="nebius" class="flex-container flexFlowColumn">
                                 <h4>Nebius API Key</h4>
@@ -2715,7 +2732,7 @@
                                 </div>
                             </div>
                             <div class="flex-container flexFlowColumn marginTopBot5">
-                                <label data-tg-type="ooba, generic" class="checkbox_label" for="bypass_status_check_textgenerationwebui">
+                                <label data-tg-type="glhf, ooba, generic" class="checkbox_label" for="bypass_status_check_textgenerationwebui">
                                     <input type="checkbox" id="bypass_status_check_textgenerationwebui" />
                                     <span data-i18n="Bypass status check">Bypass status check</span>
                                 </label>
@@ -2725,7 +2742,7 @@
                                 </label>
                             </div>
                             <div class="flex-container">
-                                <div id="api_button_textgenerationwebui" class="api_button menu_button menu_button_icon" type="submit" data-i18n="Connect" data-server-connect="ooba_blocking,vllm,aphrodite,tabby,koboldcpp,ollama,llamacpp,huggingface">Connect</div>
+                                <div id="api_button_textgenerationwebui" class="api_button menu_button menu_button_icon" type="submit" data-i18n="Connect" data-server-connect="glhf,ooba_blocking,vllm,aphrodite,tabby,koboldcpp,ollama,llamacpp,huggingface">Connect</div>
                                 <div data-tg-type="openrouter" class="menu_button menu_button_icon openrouter_authorize" title="Get your OpenRouter API token using OAuth flow. You will be redirected to openrouter.ai" data-i18n="Authorize;[title]Get your OpenRouter API token using OAuth flow. You will be redirected to openrouter.ai">Authorize</div>
                                 <div class="api_loading menu_button menu_button_icon" data-i18n="Cancel">Cancel</div>
                             </div>

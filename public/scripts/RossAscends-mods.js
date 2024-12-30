@@ -362,7 +362,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'textgenerationwebui':
-                if ((textgen_settings.type === textgen_types.NEBIUS && secret_state[SECRET_KEYS.NEBIUS])
+                if ((textgen_settings.type === textgen_types.GLHF && secret_state[SECRET_KEYS.GLHF])
+                    || (textgen_settings.type === textgen_types.NEBIUS && secret_state[SECRET_KEYS.NEBIUS])
                     || (textgen_settings.type === textgen_types.XAI && secret_state[SECRET_KEYS.XAI])
                     || (textgen_settings.type === textgen_types.HYPERBOLIC && secret_state[SECRET_KEYS.HYPERBOLIC])
 

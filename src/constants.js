@@ -190,6 +190,7 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    GLHF: 'glhf',
     NEBIUS: 'nebius',
     XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
@@ -210,6 +211,24 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+export const GLHF_KEYS = [
+    'model',
+    'prompt',
+    'echo',
+    'frequency_penalty',
+    'logit_bias',
+    'logprobs',
+    'max_tokens',
+    'n',
+    'presence_penalty',
+    'stop',
+    'stream',
+    'suffix',
+    'temperature',
+    'top_p',
+    'user',
+];
 
 export const NEBIUS_KEYS = [
     'prompt',
