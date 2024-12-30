@@ -168,6 +168,8 @@ let biasCache = undefined;
 export let model_list = [];
 
 export const chat_completion_sources = {
+    SAMBANOVA: 'sambanova',
+
     OPENAI: 'openai',
     WINDOWAI: 'windowai',
     CLAUDE: 'claude',
@@ -252,6 +254,9 @@ const default_settings = {
     group_nudge_prompt: default_group_nudge_prompt,
     scenario_format: default_scenario_format,
     personality_format: default_personality_format,
+
+    sambanova_model: 'Meta-Llama-3.1-70B-Instruct',
+
     openai_model: 'gpt-4-turbo',
     claude_model: 'claude-3-5-sonnet-20240620',
     google_model: 'gemini-1.5-pro',
@@ -331,6 +336,9 @@ const oai_settings = {
     group_nudge_prompt: default_group_nudge_prompt,
     scenario_format: default_scenario_format,
     personality_format: default_personality_format,
+
+    sambanova_model: default_settings.sambanova_model,
+
     openai_model: 'gpt-4-turbo',
     claude_model: 'claude-3-5-sonnet-20240620',
     google_model: 'gemini-1.5-pro',
@@ -1499,6 +1507,9 @@ async function sendWindowAIRequest(messages, signal, stream) {
 
 function getChatCompletionModel() {
     switch (oai_settings.chat_completion_source) {
+        case chat_completion_sources.SAMBANOVA:
+            return oai_settings.sambanova_model;
+
         case chat_completion_sources.CLAUDE:
             return oai_settings.claude_model;
         case chat_completion_sources.OPENAI:
@@ -1852,6 +1863,9 @@ async function sendOpenAIRequest(type, messages, signal) {
     messages = messages.filter(msg => msg && typeof msg === 'object');
 
     let logit_bias = {};
+
+    const isSambaNova = oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA;
+
     const isClaude = oai_settings.chat_completion_source == chat_completion_sources.CLAUDE;
     const isOpenRouter = oai_settings.chat_completion_source == chat_completion_sources.OPENROUTER;
     const isScale = oai_settings.chat_completion_source == chat_completion_sources.SCALE;
@@ -1938,6 +1952,13 @@ async function sendOpenAIRequest(type, messages, signal) {
         delete generate_data.logit_bias;
         delete generate_data.stop;
         delete generate_data.logprobs;
+    }
+
+
+    // https://community.sambanova.ai/t/sambanova-cloud-api-reference/197
+    if (isSambaNova) {
+        generate_data['top_p'] = Number(oai_settings.top_p_openai);
+        generate_data['top_k'] = Number(oai_settings.top_k_openai) || undefined;
     }
 
     if (isClaude) {
@@ -3064,6 +3085,9 @@ function loadOpenAISettings(data, settings) {
     oai_settings.scenario_format = settings.scenario_format ?? default_settings.scenario_format;
     oai_settings.personality_format = settings.personality_format ?? default_settings.personality_format;
     oai_settings.group_nudge_prompt = settings.group_nudge_prompt ?? default_settings.group_nudge_prompt;
+
+    oai_settings.sambanova_model = settings.sambanova_model ?? default_settings.sambanova_model;
+
     oai_settings.claude_model = settings.claude_model ?? default_settings.claude_model;
     oai_settings.windowai_model = settings.windowai_model ?? default_settings.windowai_model;
     oai_settings.openrouter_model = settings.openrouter_model ?? default_settings.openrouter_model;
@@ -3139,6 +3163,8 @@ function loadOpenAISettings(data, settings) {
 
     $('#openai_inline_image_quality').val(oai_settings.inline_image_quality);
     $(`#openai_inline_image_quality option[value="${oai_settings.inline_image_quality}"]`).prop('selected', true);
+
+    $('#model_sambanova_select').val(oai_settings.sambanova_model);
 
     $('#model_openai_select').val(oai_settings.openai_model);
     $(`#model_openai_select option[value="${oai_settings.openai_model}"`).attr('selected', true);
@@ -3331,6 +3357,8 @@ async function getStatusOpen() {
     }
 
     const noValidateSources = [
+        chat_completion_sources.SAMBANOVA,
+
         chat_completion_sources.SCALE,
         chat_completion_sources.CLAUDE,
         chat_completion_sources.AI21,
@@ -3885,6 +3913,9 @@ function onSettingsPresetChange() {
         min_p: ['#min_p_openai', 'min_p_openai', false],
         repetition_penalty: ['#repetition_penalty_openai', 'repetition_penalty_openai', false],
         max_context_unlocked: ['#oai_max_context_unlocked', 'max_context_unlocked', true],
+
+        sambanova_model: ['#model_sambanova_select', 'sambanova_model', false],
+
         openai_model: ['#model_openai_select', 'openai_model', false],
         claude_model: ['#model_claude_select', 'claude_model', false],
         windowai_model: ['#model_windowai_select', 'windowai_model', false],
@@ -4078,6 +4109,11 @@ async function onModelChange() {
     biasCache = undefined;
     let value = String($(this).val() || '');
 
+    if ($(this).is('#model_sambanova_select')) {
+        console.log('SambaNova model changed to', value);
+        oai_settings.sambanova_model = value;
+    }
+
     if ($(this).is('#model_claude_select')) {
         if (value.includes('-v')) {
             value = value.replace('-v', '-');
@@ -4188,6 +4224,30 @@ async function onModelChange() {
         console.log('Custom model changed to', value);
         oai_settings.custom_model = value;
         $('#custom_model_id').val(value).trigger('input');
+    }
+
+    if (oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA) {
+        if (oai_settings.max_context_unlocked) {
+            $('#openai_max_context').attr('max', unlocked_max);
+        }
+        else if (['Meta-Llama-3.3-70B-Instruct', 'Meta-Llama-3.1-70B-Instruct'].includes(oai_settings.sambanova_model)) {
+            $('#openai_max_context').attr('max', max_128k);
+        }
+        else if (['Meta-Llama-3.2-1B-Instruct', 'Meta-Llama-3.1-8B-Instruct', 'Meta-Llama-3.1-405B-Instruct'].includes(oai_settings.sambanova_model)) {
+            $('#openai_max_context').attr('max', max_16k);
+        }
+        else if (['Qwen2.5-Coder-32B-Instruct', 'Qwen2.5-72B-Instruct', 'QwQ-32B-Preview', 'Meta-Llama-Guard-3-8B'].includes(oai_settings.sambanova_model)) {
+            $('#openai_max_context').attr('max', max_8k);
+        }
+        else {
+            $('#openai_max_context').attr('max', max_4k);
+        }
+
+        oai_settings.openai_max_context = Math.min(oai_settings.openai_max_context, Number($('#openai_max_context').attr('max')));
+        $('#openai_max_context').val(oai_settings.openai_max_context).trigger('input');
+
+        oai_settings.temp_openai = Math.min(claude_max_temp, oai_settings.temp_openai);
+        $('#temp_openai').attr('max', claude_max_temp).val(oai_settings.temp_openai).trigger('input');
     }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.SCALE) {
@@ -4547,6 +4607,19 @@ function onReverseProxyInput() {
 async function onConnectButtonClick(e) {
     e.stopPropagation();
 
+    if (oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA) {
+        const api_key_sambanova = String($('#api_key_sambanova').val()).trim();
+
+        if (api_key_sambanova.length) {
+            await writeSecret(SECRET_KEYS.SAMBANOVA, api_key_sambanova);
+        }
+
+        if (!secret_state[SECRET_KEYS.SAMBANOVA]) {
+            console.log('No secret key saved for SambaNova');
+            return;
+        }
+    }
+
     if (oai_settings.chat_completion_source == chat_completion_sources.WINDOWAI) {
         return await getStatusOpen();
     }
@@ -4766,7 +4839,10 @@ async function onConnectButtonClick(e) {
 }
 
 function toggleChatCompletionForms() {
-    if (oai_settings.chat_completion_source == chat_completion_sources.CLAUDE) {
+    if (oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA) {
+        $('#model_sambanova_select').trigger('change');
+    }
+    else if (oai_settings.chat_completion_source == chat_completion_sources.CLAUDE) {
         $('#model_claude_select').trigger('change');
     }
     else if (oai_settings.chat_completion_source == chat_completion_sources.OPENAI) {
@@ -5515,6 +5591,8 @@ export function initOpenAI() {
 
         saveSettingsDebounced();
     });
+
+    $('#model_sambanova_select').on('change', onModelChange);
 
     $('#api_button_openai').on('click', onConnectButtonClick);
     $('#openai_reverse_proxy').on('input', onReverseProxyInput);

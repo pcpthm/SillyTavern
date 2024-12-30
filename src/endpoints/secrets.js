@@ -8,6 +8,8 @@ import { jsonParser } from '../express-common.js';
 
 export const SECRETS_FILE = 'secrets.json';
 export const SECRET_KEYS = {
+    SAMBANOVA: 'api_key_sambanova',
+
     HORDE: 'api_key_horde',
     MANCER: 'api_key_mancer',
     VLLM: 'api_key_vllm',

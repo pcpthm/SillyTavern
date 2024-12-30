@@ -3835,6 +3835,9 @@ function getModelOptions(quiet) {
         { id: 'ollama_model', api: 'textgenerationwebui', type: textgen_types.OLLAMA },
         { id: 'tabby_model', api: 'textgenerationwebui', type: textgen_types.TABBY },
         { id: 'featherless_model', api: 'textgenerationwebui', type: textgen_types.FEATHERLESS },
+
+        { id: 'model_sambanova_select', api: 'openai', type: chat_completion_sources.SAMBANOVA },
+
         { id: 'model_openai_select', api: 'openai', type: chat_completion_sources.OPENAI },
         { id: 'model_claude_select', api: 'openai', type: chat_completion_sources.CLAUDE },
         { id: 'model_windowai_select', api: 'openai', type: chat_completion_sources.WINDOWAI },
