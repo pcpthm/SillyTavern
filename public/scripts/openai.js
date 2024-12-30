@@ -3768,6 +3768,7 @@ async function saveOpenAIPreset(name, settings, triggerUi = true) {
     const presetBody = {
         chat_completion_source: settings.chat_completion_source,
 
+        xai_model: settings.xai_model,
         hyperbolic_model: settings.hyperbolic_model,
         sambanova_model: settings.sambanova_model,
 
@@ -5395,6 +5396,9 @@ export function isImageInliningSupported() {
 
     // gultra just isn't being offered as multimodal, thanks google.
     const visionSupportedModels = [
+        'grok-2-image',
+        'grok-2-vision',
+        'grok-vision',
         'qwen2-vl',
 
         'chatgpt-4o-latest',

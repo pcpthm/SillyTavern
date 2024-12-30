@@ -20,6 +20,7 @@ import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, getTextTokens, tokenizers } from
 import { getSortableDelay, onlyUnique, arraysEqual } from './utils.js';
 
 export const textgen_types = {
+    XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
 
     OOBA: 'ooba',
@@ -40,6 +41,7 @@ export const textgen_types = {
 };
 
 const {
+    XAI,
     HYPERBOLIC,
 
     GENERIC,
@@ -109,6 +111,7 @@ export const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let XAI_SERVER = 'https://api.x.ai/v1';
 let HYPERBOLIC_SERVER = 'https://api.hyperbolic.xyz/v1';
 
 // Maybe let it be configurable in the future?
@@ -200,6 +203,7 @@ const settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    xai_model: '',
     hyperbolic_model: '',
 
     mancer_model: 'mytholite',
@@ -338,6 +342,8 @@ export function validateTextGenUrl() {
 export function getTextGenServer(type = null) {
     const selectedType = type ?? settings.type;
     switch (selectedType) {
+        case XAI:
+            return XAI_SERVER;
         case HYPERBOLIC:
             return HYPERBOLIC_SERVER;
 
@@ -547,6 +553,7 @@ export function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#xai_model').val(settings.xai_model);
     $('#hyperbolic_model').val(settings.hyperbolic_model);
 
     if (loadedSettings.api_use_mancer_webui) {
@@ -1083,6 +1090,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (settings.type) {
+        case XAI:
         case HYPERBOLIC:
 
         case KOBOLDCPP:
@@ -1194,6 +1202,8 @@ function toIntArray(string) {
 
 export function getTextGenModel() {
     switch (settings.type) {
+        case XAI:
+            return settings.xai_model;
         case HYPERBOLIC:
             return settings.hyperbolic_model;
 
@@ -1258,6 +1268,9 @@ function isDynamicTemperatureSupported() {
  */
 export function getLogprobsNumber(type = null) {
     const selectedType = type ?? settings.type;
+    if (selectedType === XAI) {
+        return 8;
+    }
     if (selectedType === VLLM || selectedType === INFERMATICAI || selectedType === OPENROUTER) {
         return 5;
     }
@@ -1449,6 +1462,13 @@ export async function getTextGenGenerationData(finalPrompt, maxTokens, isImperso
             : undefined,
     };
 
+    if (settings.type === XAI) {
+        params.response_format = settings.json_schema && Object.keys(settings.json_schema).length > 0 ? {
+            type: 'json_object',
+            schema: settings.json_schema,
+        } : undefined;
+    }
+
     if (settings.type === HYPERBOLIC) {
         params.top_k = settings.top_k || -1;
     }
@@ -1486,6 +1506,7 @@ export async function getTextGenGenerationData(finalPrompt, maxTokens, isImperso
     }
 
     switch (settings.type) {
+        case XAI:
         case HYPERBOLIC:
 
         case VLLM:

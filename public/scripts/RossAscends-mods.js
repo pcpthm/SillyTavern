@@ -381,7 +381,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'textgenerationwebui':
-                if ((textgen_settings.type === textgen_types.HYPERBOLIC && secret_state[SECRET_KEYS.HYPERBOLIC])
+                if ((textgen_settings.type === textgen_types.XAI && secret_state[SECRET_KEYS.XAI])
+                    || (textgen_settings.type === textgen_types.HYPERBOLIC && secret_state[SECRET_KEYS.HYPERBOLIC])
 
                     || (textgen_settings.type === textgen_types.MANCER && secret_state[SECRET_KEYS.MANCER])
                     || (textgen_settings.type === textgen_types.TOGETHERAI && secret_state[SECRET_KEYS.TOGETHERAI])

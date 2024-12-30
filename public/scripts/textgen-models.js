@@ -80,6 +80,25 @@ const OPENROUTER_PROVIDERS = [
     'xAI',
 ];
 
+export async function loadXAIModels(data) {
+    if (!Array.isArray(data)) {
+        console.error('Invalid xAI models data', data);
+        return;
+    }
+
+    if (!data.find(x => x.id === textgen_settings.xai_model)) {
+        textgen_settings.xai_model = data[0]?.id || '';
+    }
+
+    $('#xai_model').empty();
+    for (const model of data) {
+        const option = document.createElement('option');
+        option.text = option.value = model.id;
+        option.selected = model.id === textgen_settings.xai_model;
+        $('#xai_model').append(option);
+    }
+}
+
 export async function loadOllamaModels(data) {
     if (!Array.isArray(data)) {
         console.error('Invalid Ollama models data', data);
@@ -579,6 +598,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function onXAIModelSelect() {
+    const modelId = String($('#xai_model').val());
+    textgen_settings.xai_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onHyperbolicModelSelect() {
     const modelId = String($('#hyperbolic_model').val());
     textgen_settings.hyperbolic_model = modelId;
@@ -939,6 +964,7 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#xai_model').on('change', onXAIModelSelect);
     $('#hyperbolic_model').on('change', onHyperbolicModelSelect);
 
     $('#mancer_model').on('change', onMancerModelSelect);

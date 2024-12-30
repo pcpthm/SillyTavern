@@ -83,7 +83,7 @@ const INPUT_MAP = {
     [SECRET_KEYS.NANOGPT]: '#api_key_nanogpt',
     [SECRET_KEYS.GENERIC]: '#api_key_generic',
     [SECRET_KEYS.DEEPSEEK]: '#api_key_deepseek',
-    [SECRET_KEYS.XAI]: '#api_key_xai',
+    [SECRET_KEYS.XAI]: 'input[name="api_key_xai"]',
 };
 
 async function clearSecret() {

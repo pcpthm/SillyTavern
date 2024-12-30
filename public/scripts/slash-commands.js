@@ -4109,6 +4109,7 @@ function setBackgroundCallback(_, bg) {
 function getModelOptions(quiet) {
     const nullResult = { control: null, options: null };
     const modelSelectMap = [
+        { id: 'xai_model', api: 'textgenerationwebui', type: textgen_types.XAI },
         { id: 'hyperbolic_model', api: 'textgenerationwebui', type: textgen_types.HYPERBOLIC },
 
         { id: 'generic_model_textgenerationwebui', api: 'textgenerationwebui', type: textgen_types.GENERIC },

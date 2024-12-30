@@ -190,6 +190,7 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
 
     OOBA: 'ooba',
@@ -208,6 +209,30 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+// https://docs.x.ai/docs/api-reference#completions-legacy
+export const XAI_KEYS = [
+    'model',
+    'prompt',
+    'echo',
+    'frequency_penalty',
+    // 'logit_bias',
+    // 'logprobs',
+    'max_tokens',
+    'n',
+    'presence_penalty',
+    'reasoning_effort',
+    'response_format',
+    'seed',
+    'stop',
+    'stream',
+    'stream_options',
+    'suffix',
+    'temperature',
+    // 'top_logprobs',
+    'top_p',
+    'user',
+];
 
 // https://docs.hyperbolic.xyz/docs/rest-api
 export const HYPERBOLIC_KEYS = [
