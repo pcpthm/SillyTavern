@@ -2183,6 +2183,10 @@ async function sendOpenAIRequest(type, messages, signal) {
     }
 
     if (isMistral) {
+        if (generate_data['temperature'] === 0) {
+            generate_data['top_p'] = 1;
+        }
+
         generate_data['safe_prompt'] = false; // already defaults to false, but just incase they change that in the future.
         generate_data['stop'] = getCustomStoppingStrings(); // Mistral shouldn't have limits on stop strings.
     }
