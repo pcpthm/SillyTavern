@@ -3823,6 +3823,7 @@ function setBackgroundCallback(_, bg) {
 function getModelOptions(quiet) {
     const nullResult = { control: null, options: null };
     const modelSelectMap = [
+        { id: 'xai_model', api: 'textgenerationwebui', type: textgen_types.XAI },
         { id: 'hyperbolic_model', api: 'textgenerationwebui', type: textgen_types.HYPERBOLIC },
 
         { id: 'generic_model_textgenerationwebui', api: 'textgenerationwebui', type: textgen_types.GENERIC },
@@ -3838,6 +3839,7 @@ function getModelOptions(quiet) {
         { id: 'tabby_model', api: 'textgenerationwebui', type: textgen_types.TABBY },
         { id: 'featherless_model', api: 'textgenerationwebui', type: textgen_types.FEATHERLESS },
 
+        { id: 'model_xai_select', api: 'openai', type: chat_completion_sources.XAI },
         { id: 'model_hyperbolic_select', api: 'openai', type: chat_completion_sources.HYPERBOLIC },
         { id: 'model_sambanova_select', api: 'openai', type: chat_completion_sources.SAMBANOVA },
 

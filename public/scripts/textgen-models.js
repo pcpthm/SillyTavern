@@ -565,6 +565,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function onXAIModelSelect() {
+    const modelId = String($('#xai_model').val());
+    textgen_settings.xai_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onHyperbolicModelSelect() {
     const modelId = String($('#hyperbolic_model').val());
     textgen_settings.hyperbolic_model = modelId;
@@ -921,6 +927,7 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#xai_model').on('change', onXAIModelSelect);
     $('#hyperbolic_model').on('change', onHyperbolicModelSelect);
 
     $('#mancer_model').on('change', onMancerModelSelect);

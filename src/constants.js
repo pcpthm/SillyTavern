@@ -160,6 +160,7 @@ export const GEMINI_SAFETY = [
 ];
 
 export const CHAT_COMPLETION_SOURCES = {
+    XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
     SAMBANOVA: 'sambanova',
 
@@ -188,6 +189,7 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
 
     OOBA: 'ooba',
@@ -206,6 +208,27 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+// https://docs.x.ai/api/endpoints#completions
+export const XAI_KEYS = [
+    'model',
+    'prompt',
+    'echo',
+    'frequency_penalty',
+    'logit_bias',
+    // 'logprobs',
+    'max_tokens',
+    'n',
+    'presence_penalty',
+    // 'seed',
+    'stop',
+    'stream',
+    'stream_options',
+    'suffix',
+    'temperature',
+    'top_p',
+    'user',
+];
 
 // https://docs.hyperbolic.xyz/docs/rest-api
 export const HYPERBOLIC_KEYS = [

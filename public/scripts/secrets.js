@@ -2,6 +2,7 @@ import { DOMPurify } from '../lib.js';
 import { callPopup, getRequestHeaders } from '../script.js';
 
 export const SECRET_KEYS = {
+    XAI: 'api_key_xai',
     HYPERBOLIC: 'api_key_hyperbolic',
     SAMBANOVA: 'api_key_sambanova',
 
@@ -46,6 +47,7 @@ export const SECRET_KEYS = {
 };
 
 const INPUT_MAP = {
+    [SECRET_KEYS.XAI]: 'input[name="api_key_xai"]',
     [SECRET_KEYS.HYPERBOLIC]: 'input[name="api_key_hyperbolic"]',
     [SECRET_KEYS.SAMBANOVA]: '#api_key_sambanova',
 

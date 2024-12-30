@@ -556,6 +556,8 @@ export class ToolManager {
         }
 
         const supportedSources = [
+            chat_completion_sources.XAI,
+
             chat_completion_sources.OPENAI,
             chat_completion_sources.CUSTOM,
             chat_completion_sources.MISTRALAI,

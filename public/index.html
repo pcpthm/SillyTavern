@@ -643,7 +643,7 @@
                                         <input type="number" id="openai_max_tokens" name="openai_max_tokens" class="text_pole" min="1" max="65536">
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="hyperbolic,openai,custom">
+                                <div class="range-block" data-source="xai,hyperbolic,openai,custom">
                                     <div class="range-block-title" data-i18n="Multiple swipes per generation">
                                         Multiple swipes per generation
                                     </div>
@@ -682,7 +682,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="hyperbolic,sambanova,openai,claude,windowai,openrouter,ai21,scale,makersuite,mistralai,custom,cohere,perplexity,groq,01ai,nanogpt,deepseek">
+                                <div class="range-block" data-source="xai,hyperbolic,sambanova,openai,claude,windowai,openrouter,ai21,scale,makersuite,mistralai,custom,cohere,perplexity,groq,01ai,nanogpt,deepseek">
                                     <div class="range-block-title" data-i18n="Temperature">
                                         Temperature
                                     </div>
@@ -695,7 +695,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="hyperbolic,openai,openrouter,custom,cohere,perplexity,groq,mistralai,nanogpt,deepseek">
+                                <div class="range-block" data-source="xai,hyperbolic,openai,openrouter,custom,cohere,perplexity,groq,mistralai,nanogpt,deepseek">
                                     <div class="range-block-title" data-i18n="Frequency Penalty">
                                         Frequency Penalty
                                     </div>
@@ -708,7 +708,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="hyperbolic,openai,openrouter,custom,cohere,perplexity,groq,mistralai,nanogpt,deepseek">
+                                <div class="range-block" data-source="xai,hyperbolic,openai,openrouter,custom,cohere,perplexity,groq,mistralai,nanogpt,deepseek">
                                     <div class="range-block-title" data-i18n="Presence Penalty">
                                         Presence Penalty
                                     </div>
@@ -734,7 +734,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="hyperbolic,sambanova,openai,claude,openrouter,ai21,scale,makersuite,mistralai,custom,cohere,perplexity,groq,01ai,nanogpt,deepseek">
+                                <div class="range-block" data-source="xai,hyperbolic,sambanova,openai,claude,openrouter,ai21,scale,makersuite,mistralai,custom,cohere,perplexity,groq,01ai,nanogpt,deepseek">
                                     <div class="range-block-title" data-i18n="Top P">
                                         Top P
                                     </div>
@@ -1235,7 +1235,7 @@
                                         <div class="fa-solid fa-circle-info opacity50p" title="Customize displayed samplers or add custom samplers." data-i18n="[title]Customize displayed samplers or add custom samplers."></div>
                                     </small>
                                 </div>
-                                <div data-tg-type="hyperbolic, mancer, vllm, aphrodite, tabby, infermaticai" class="flex-container flexFlowColumn alignitemscenter flexBasis100p flexGrow flexShrink gap0">
+                                <div data-tg-type="xai, hyperbolic, mancer, vllm, aphrodite, tabby, infermaticai" class="flex-container flexFlowColumn alignitemscenter flexBasis100p flexGrow flexShrink gap0">
                                     <small data-i18n="Multiple swipes per generation">Multiple swipes per generation</small>
                                     <input type="number" id="n_textgenerationwebui" class="text_pole textAlignCenter" min="1" value="1" step="1" />
                                 </div>
@@ -1930,7 +1930,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="range-block" data-source="openai,cohere,mistralai,custom,claude,openrouter,groq,deepseek">
+                                    <div class="range-block" data-source="xai,openai,cohere,mistralai,custom,claude,openrouter,groq,deepseek">
                                         <label for="openai_function_calling" class="checkbox_label flexWrap widthFreeExpand">
                                             <input id="openai_function_calling" type="checkbox" />
                                             <span data-i18n="Enable function calling">Enable function calling</span>
@@ -2234,7 +2234,24 @@
                                     <option value="ooba">Text Generation WebUI (oobabooga)</option>
                                     <option value="togetherai">TogetherAI</option>
                                     <option value="vllm">vLLM</option>
+                                    <option value="xai">xAI</option>
                                 </select>
+                            </div>
+                            <div data-tg-type="xai" class="flex-container flexFlowColumn">
+                                <h4>xAI API Key</h4>
+                                <div class="flex-container">
+                                    <input id="api_key_xai_tg" name="api_key_xai" class="text_pole flex1" type="text" autocomplete="off">
+                                    <div title="Clear your API key" class="menu_button fa-solid fa-circle-xmark clear-api-key" data-key="api_key_xai"></div>
+                                </div>
+                                    <div>
+                                    <h4>xAI Model</h4>
+                                    <select id="xai_model">
+                                        <option value="grok-beta">grok-beta</option>
+                                        <option value="grok-2-1212">grok-2-1212</option>
+                                        <option value="grok-vision-beta">grok-vision-beta</option>
+                                        <option value="grok-2-vision-1212">grok-2-vision-1212</option>
+                                    </select>
+                                </div>
                             </div>
                             <div data-tg-type="hyperbolic" class="flex-container flexFlowColumn">
                                 <h4>Hyperbolic API Key</h4>
@@ -2731,6 +2748,7 @@
                                 <option value="sambanova">SambaNova</option>
                                 <option value="scale">Scale</option>
                                 <option value="windowai">Window AI</option>
+                                <option value="xai">xAI</option>
                             </optgroup>
                         </select>
                         <div class="inline-drawer wide100p" data-source="openai,claude,mistralai,makersuite">
@@ -2810,6 +2828,22 @@
                                         Do not proceed if you do not agree to this!
                                     </i>
                                 </b>
+                            </div>
+                        </div>
+                        <div data-source="xai">
+                            <h4>xAI API Key</h4>
+                            <div class="flex-container">
+                                <input id="api_key_xai_chat" name="api_key_xai" class="text_pole flex1" type="text" autocomplete="off">
+                                <div title="Clear your API key" class="menu_button fa-solid fa-circle-xmark clear-api-key" data-key="api_key_xai"></div>
+                            </div>
+                            <div>
+                                <h4>xAI Model</h4>
+                                <select id="model_xai_select">
+                                    <option value="grok-beta">grok-beta</option>
+                                    <option value="grok-2-1212">grok-2-1212</option>
+                                    <option value="grok-vision-beta">grok-vision-beta</option>
+                                    <option value="grok-2-vision-1212">grok-2-vision-1212</option>
+                                </select>
                             </div>
                         </div>
                         <div data-source="hyperbolic">

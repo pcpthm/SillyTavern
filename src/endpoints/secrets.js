@@ -8,6 +8,7 @@ import { jsonParser } from '../express-common.js';
 
 export const SECRETS_FILE = 'secrets.json';
 export const SECRET_KEYS = {
+    XAI: 'api_key_xai',
     HYPERBOLIC: 'api_key_hyperbolic',
     SAMBANOVA: 'api_key_sambanova',
 

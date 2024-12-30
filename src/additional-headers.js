@@ -2,6 +2,14 @@ import { TEXTGEN_TYPES, OPENROUTER_HEADERS, FEATHERLESS_HEADERS } from './consta
 import { SECRET_KEYS, readSecret } from './endpoints/secrets.js';
 import { getConfigValue } from './util.js';
 
+function getXAIHeaders(directories) {
+    const apiKey = readSecret(directories, SECRET_KEYS.XAI);
+
+    return apiKey ? ({
+        'Authorization': `Bearer ${apiKey}`,
+    }) : {};
+}
+
 function getHyperbolicHeaders(directories) {
     const apiKey = readSecret(directories, SECRET_KEYS.HYPERBOLIC);
 
@@ -222,6 +230,7 @@ export function setAdditionalHeaders(request, args, server) {
  */
 export function setAdditionalHeadersByType(requestHeaders, type, server, directories) {
     const headerGetters = {
+        [TEXTGEN_TYPES.XAI]: getXAIHeaders,
         [TEXTGEN_TYPES.HYPERBOLIC]: getHyperbolicHeaders,
 
         [TEXTGEN_TYPES.MANCER]: getMancerHeaders,

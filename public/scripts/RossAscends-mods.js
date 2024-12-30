@@ -362,7 +362,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'textgenerationwebui':
-                if ((textgen_settings.type === textgen_types.HYPERBOLIC && secret_state[SECRET_KEYS.HYPERBOLIC])
+                if ((textgen_settings.type === textgen_types.XAI && secret_state[SECRET_KEYS.XAI])
+                    || (textgen_settings.type === textgen_types.HYPERBOLIC && secret_state[SECRET_KEYS.HYPERBOLIC])
 
                     || (textgen_settings.type === textgen_types.MANCER && secret_state[SECRET_KEYS.MANCER])
                     || (textgen_settings.type === textgen_types.TOGETHERAI && secret_state[SECRET_KEYS.TOGETHERAI])
@@ -378,7 +379,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'openai':
-                if ((secret_state[SECRET_KEYS.HYPERBOLIC] && oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC)
+                if ((secret_state[SECRET_KEYS.XAI] && oai_settings.chat_completion_source == chat_completion_sources.XAI)
+                    || (secret_state[SECRET_KEYS.HYPERBOLIC] && oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC)
                     || (secret_state[SECRET_KEYS.SAMBANOVA] && oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA)
 
                     || ((secret_state[SECRET_KEYS.OPENAI] || oai_settings.reverse_proxy) && oai_settings.chat_completion_source == chat_completion_sources.OPENAI)

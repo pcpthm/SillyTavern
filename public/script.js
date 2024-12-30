@@ -1200,7 +1200,9 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgen_settings.type === textgen_types.HYPERBOLIC) {
+        if (textgen_settings.type === textgen_types.XAI) {
+            setOnlineStatus(textgen_settings.xai_model || data?.result);
+        } else if (textgen_settings.type === textgen_types.HYPERBOLIC) {
             setOnlineStatus(textgen_settings.hyperbolic_model || data?.result);
         } else if (textgen_settings.type === textgen_types.MANCER) {
             loadMancerModels(data?.data);
@@ -8731,6 +8733,16 @@ const swipe_right = () => {
 };
 
 const CONNECT_API_MAP = {
+    'xai': {
+        selected: 'openai',
+        button: '#api_button_openai',
+        source: chat_completion_sources.XAI,
+    },
+    'xai-text': {
+        selected: 'textgenerationwebui',
+        button: '#api_button_textgenerationwebui',
+        source: textgen_types.XAI,
+    },
     'hyperbolic': {
         selected: 'openai',
         button: '#api_button_openai',
@@ -10221,6 +10233,7 @@ jQuery(async function () {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_xai_tg', secret: SECRET_KEYS.XAI },
             { id: 'api_key_hyperbolic_tg', secret: SECRET_KEYS.HYPERBOLIC },
 
             { id: 'api_key_mancer', secret: SECRET_KEYS.MANCER },
