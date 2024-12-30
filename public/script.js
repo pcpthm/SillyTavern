@@ -250,7 +250,7 @@ import {
 import { getBackgrounds, initBackgrounds, loadBackgroundSettings, background_settings } from './scripts/backgrounds.js';
 import { hideLoader, showLoader } from './scripts/loader.js';
 import { BulkEditOverlay, CharacterContextMenu } from './scripts/BulkEditOverlay.js';
-import { loadNebiusModels, loadXAIModels, loadFeatherlessModels, loadMancerModels, loadOllamaModels, loadTogetherAIModels, loadInfermaticAIModels, loadOpenRouterModels, loadVllmModels, loadAphroditeModels, loadDreamGenModels, initTextGenModels, loadTabbyModels, loadGenericModels } from './scripts/textgen-models.js';
+import { loadGLHFModels, loadNebiusModels, loadXAIModels, loadFeatherlessModels, loadMancerModels, loadOllamaModels, loadTogetherAIModels, loadInfermaticAIModels, loadOpenRouterModels, loadVllmModels, loadAphroditeModels, loadDreamGenModels, initTextGenModels, loadTabbyModels, loadGenericModels } from './scripts/textgen-models.js';
 import { appendFileContent, hasPendingFileAttachment, populateFileAttachment, decodeStyleTags, encodeStyleTags, isExternalMediaAllowed, getCurrentEntityId, preserveNeutralChat, restoreNeutralChat } from './scripts/chats.js';
 import { getPresetManager, initPresetManager } from './scripts/preset-manager.js';
 import { evaluateMacros, getLastMessageId, initMacros } from './scripts/macros.js';
@@ -1226,6 +1226,12 @@ async function getStatusTextgen() {
         return resultCheckStatus();
     }
 
+    if (textgen_settings.type == textgen_types.GLHF && textgen_settings.bypass_status_check) {
+        loadGLHFModels([]);
+        setOnlineStatus(textgen_settings.glhf_model);
+        return resultCheckStatus();
+    }
+
     if ([textgen_types.GENERIC, textgen_types.OOBA].includes(textgen_settings.type) && textgen_settings.bypass_status_check) {
         setOnlineStatus(t`Status check bypassed`);
         return resultCheckStatus();
@@ -1244,7 +1250,10 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgen_settings.type == textgen_types.NEBIUS) {
+        if (textgen_settings.type == textgen_types.GLHF) {
+            loadGLHFModels(data?.data);
+            setOnlineStatus(textgen_settings.glhf_model || data?.result);
+        } else if (textgen_settings.type == textgen_types.NEBIUS) {
             loadNebiusModels(data?.data);
             setOnlineStatus(textgen_settings.nebius_model || data?.result);
         } else if (textgen_settings.type === textgen_types.XAI) {
@@ -5989,8 +5998,9 @@ function parseAndSaveLogprobs(data, continueFrom) {
                 case textgen_types.LLAMACPP: {
                     logprobs = data?.completion_probabilities?.map(x => parseTextgenLogprobs(x.content, [x])) || null;
                 } break;
-                case textgen_types.XAI:
+                case textgen_types.GLHF:
                 case textgen_types.NEBIUS:
+                case textgen_types.XAI:
                 case textgen_types.HYPERBOLIC:
 
                 case textgen_types.KOBOLDCPP:
@@ -9557,6 +9567,11 @@ export function swipe_right(_event, { source, repeated } = {}) {
  * @type {Record<string, ConnectAPIMap>}
  */
 export const CONNECT_API_MAP = {
+    'glhf-text': {
+        selected: 'textgenerationwebui',
+        button: '#api_button_textgenerationwebui',
+        source: textgen_types.GLHF,
+    },
     'nebius': {
         selected: 'openai',
         button: '#api_button_openai',
@@ -11094,6 +11109,7 @@ jQuery(async function () {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_glhf_tg', secret: SECRET_KEYS.GLHF },
             { id: 'api_key_nebius_tg', secret: SECRET_KEYS.NEBIUS },
             { id: 'api_key_xai_tg', secret: SECRET_KEYS.XAI },
             { id: 'api_key_hyperbolic_tg', secret: SECRET_KEYS.HYPERBOLIC },
