@@ -86,7 +86,7 @@ const INPUT_MAP = {
     [SECRET_KEYS.BLOCKENTROPY]: '#api_key_blockentropy',
     [SECRET_KEYS.NANOGPT]: '#api_key_nanogpt',
     [SECRET_KEYS.GENERIC]: '#api_key_generic',
-    [SECRET_KEYS.DEEPSEEK]: '#api_key_deepseek',
+    [SECRET_KEYS.DEEPSEEK]: 'input[name="api_key_deepseek"]',
 };
 
 async function clearSecret() {

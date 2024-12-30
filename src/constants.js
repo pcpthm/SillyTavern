@@ -190,6 +190,7 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    DEEPSEEK: 'deepseek',
     GLHF: 'glhf',
     NEBIUS: 'nebius',
     XAI: 'xai',
@@ -211,6 +212,24 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+// <https://api-docs.deepseek.com/api/create-completion>
+export const DEEPSEEK_KEYS = [
+    'model',
+    'prompt',
+    'echo',
+    'frequency_penalty',
+    'logprobs',
+    'max_tokens',
+    'presence_penalty',
+    'stop',
+    'stream',
+    'stream_options',
+    'suffix',
+    'temperature',
+    'top_p',
+    'response_format',  // <https://api-docs.deepseek.com/guides/json_mode>
+];
 
 export const GLHF_KEYS = [
     'model',

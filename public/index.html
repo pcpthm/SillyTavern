@@ -2219,6 +2219,7 @@
                                 <h4 data-i18n="API Type">API Type</h4>
                                 <select id="textgen_type">
                                     <option value="aphrodite">Aphrodite</option>
+                                    <option value="deepseek">DeepSeek</option>
                                     <option value="dreamgen">DreamGen</option>
                                     <option value="featherless">Featherless</option>
                                     <option value="generic" data-i18n="Generic (OpenAI-compatible) [LM Studio, LiteLLM, etc.]">Generic (OpenAI-compatible) [LM Studio, LiteLLM, etc.]</option>
@@ -2238,6 +2239,20 @@
                                     <option value="vllm">vLLM</option>
                                     <option value="xai">xAI</option>
                                 </select>
+                            </div>
+                            <div data-tg-type="deepseek" class="flex-container flexFlowColumn">
+                                <h4>DeepSeek API Key</h4>
+                                <div class="flex-container">
+                                    <input id="api_key_deepseek_tg" name="api_key_deepseek" class="text_pole flex1" type="text" autocomplete="off">
+                                    <div title="Clear your API key" class="menu_button fa-solid fa-circle-xmark clear-api-key" data-key="api_key_deepseek"></div>
+                                </div>
+                                    <div>
+                                    <h4>DeepSeek Model</h4>
+                                    <select id="deepseek_model">
+                                        <option value="deepseek-chat">deepseek-chat</option>
+                                        <option value="deepseek-coder">deepseek-coder</option>
+                                    </select>
+                                </div>
                             </div>
                             <div data-tg-type="glhf" class="flex-container flexFlowColumn">
                                 <h4>glhf.chat API Key</h4>

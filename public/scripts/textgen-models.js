@@ -607,6 +607,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function onDeepSeekModelSelect() {
+    const modelId = String($('#deepseek_model').val());
+    textgen_settings.deepseek_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onGLHFModelChange() {
     const modelId = String($('#glhf_model').val());
     textgen_settings.glhf_model = modelId;
@@ -988,6 +994,7 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#deepseek_model').on('change', onDeepSeekModelSelect);
     $('#glhf_model').on('change', onGLHFModelChange);
     $('#glhf_model_select').on('change', onGLHFModelSelect);
     $('#nebius_model').on('change', onNebiusModelSelect);
