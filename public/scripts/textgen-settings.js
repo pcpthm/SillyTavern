@@ -1380,6 +1380,7 @@ export async function getTextGenGenerationData(finalPrompt, maxTokens, isImperso
         'ignore_eos': settings.ban_eos_token,
         'n_probs': power_user.request_token_probabilities ? 10 : undefined,
         'rep_pen_slope': settings.rep_pen_slope,
+        'suffix': power_user.suffix.length !== 0 ? substituteParams(power_user.suffix) : undefined,
     };
     const vllmParams = {
         'n': canMultiSwipe ? settings.n : 1,

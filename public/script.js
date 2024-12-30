@@ -6103,6 +6103,11 @@ export function cleanUpMessage({ getMessage, isImpersonate, isContinue, displayI
         getMessage = substituteParams(power_user.user_prompt_bias) + getMessage;
     }
 
+    // Add the prompt suffix.
+    if (!displayIncompleteSentences && power_user.suffix.length !== 0) {
+        getMessage = getMessage + substituteParams(power_user.suffix);
+    }
+
     // Allow for caching of stopping strings. getStoppingStrings is an expensive function, especially with macros
     // enabled, so for streaming, we call it once and then pass it into each cleanUpMessage call.
     if (!stoppingStrings) {
