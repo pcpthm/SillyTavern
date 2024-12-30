@@ -120,6 +120,7 @@ let power_user = {
     always_force_name2: false,
     user_prompt_bias: '',
     show_user_prompt_bias: true,
+    suffix: '',
     auto_continue: {
         enabled: false,
         allow_chat_completions: false,
@@ -1505,6 +1506,7 @@ async function loadPowerUserSettings(settings, data) {
     $('#noShadowsmode').prop('checked', power_user.noShadows);
     $('#start_reply_with').text(power_user.user_prompt_bias);
     $('#chat-show-reply-prefix-checkbox').prop('checked', power_user.show_user_prompt_bias);
+    $('#suffix').text(power_user.suffix);
     $('#auto_continue_enabled').prop('checked', power_user.auto_continue.enabled);
     $('#auto_continue_allow_chat_completions').prop('checked', power_user.auto_continue.allow_chat_completions);
     $('#auto_continue_target_length').val(power_user.auto_continue.target_length);
@@ -3108,6 +3110,11 @@ $(document).ready(() => {
     $('#chat-show-reply-prefix-checkbox').change(function () {
         power_user.show_user_prompt_bias = !!$(this).prop('checked');
         reloadCurrentChat();
+        saveSettingsDebounced();
+    });
+
+    $('#suffix').on('input', function () {
+        power_user.suffix = String($(this).val());
         saveSettingsDebounced();
     });
 
