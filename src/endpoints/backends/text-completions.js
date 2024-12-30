@@ -5,6 +5,7 @@ import _ from 'lodash';
 
 import { jsonParser } from '../../express-common.js';
 import {
+    NEBIUS_KEYS,
     XAI_KEYS,
     HYPERBOLIC_KEYS,
 
@@ -118,6 +119,7 @@ router.post('/status', jsonParser, async function (request, response) {
         let result = '';
 
         switch (apiType) {
+            case TEXTGEN_TYPES.NEBIUS:
             case TEXTGEN_TYPES.XAI:
             case TEXTGEN_TYPES.HYPERBOLIC:
 
@@ -294,6 +296,7 @@ router.post('/generate', jsonParser, async function (request, response) {
         let url = trimV1(baseUrl);
 
         switch (request.body.api_type) {
+            case TEXTGEN_TYPES.NEBIUS:
             case TEXTGEN_TYPES.XAI:
             case TEXTGEN_TYPES.HYPERBOLIC:
 
@@ -335,6 +338,11 @@ router.post('/generate', jsonParser, async function (request, response) {
         };
 
         setAdditionalHeaders(request, args, baseUrl);
+
+        if (request.body.api_type === TEXTGEN_TYPES.NEBIUS) {
+            request.body = _.pickBy(request.body, (_, key) => NEBIUS_KEYS.includes(key));
+            args.body = JSON.stringify(request.body);
+        }
 
         if (request.body.api_type === TEXTGEN_TYPES.XAI) {
             request.body = _.pickBy(request.body, (_, key) => XAI_KEYS.includes(key));

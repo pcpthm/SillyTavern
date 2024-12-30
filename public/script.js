@@ -237,7 +237,7 @@ import {
 import { getBackgrounds, initBackgrounds, loadBackgroundSettings, background_settings } from './scripts/backgrounds.js';
 import { hideLoader, showLoader } from './scripts/loader.js';
 import { BulkEditOverlay, CharacterContextMenu } from './scripts/BulkEditOverlay.js';
-import { loadFeatherlessModels, loadMancerModels, loadOllamaModels, loadTogetherAIModels, loadInfermaticAIModels, loadOpenRouterModels, loadVllmModels, loadAphroditeModels, loadDreamGenModels, initTextGenModels, loadTabbyModels, loadGenericModels } from './scripts/textgen-models.js';
+import { loadNebiusModels, loadFeatherlessModels, loadMancerModels, loadOllamaModels, loadTogetherAIModels, loadInfermaticAIModels, loadOpenRouterModels, loadVllmModels, loadAphroditeModels, loadDreamGenModels, initTextGenModels, loadTabbyModels, loadGenericModels } from './scripts/textgen-models.js';
 import { appendFileContent, hasPendingFileAttachment, populateFileAttachment, decodeStyleTags, encodeStyleTags, isExternalMediaAllowed, getCurrentEntityId, preserveNeutralChat, restoreNeutralChat } from './scripts/chats.js';
 import { getPresetManager, initPresetManager } from './scripts/preset-manager.js';
 import { evaluateMacros, getLastMessageId, initMacros } from './scripts/macros.js';
@@ -1200,7 +1200,10 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgen_settings.type === textgen_types.XAI) {
+        if (textgen_settings.type == textgen_types.NEBIUS) {
+            loadNebiusModels(data?.data);
+            setOnlineStatus(textgen_settings.nebius_model || data?.result);
+        } else if (textgen_settings.type === textgen_types.XAI) {
             setOnlineStatus(textgen_settings.xai_model || data?.result);
         } else if (textgen_settings.type === textgen_types.HYPERBOLIC) {
             setOnlineStatus(textgen_settings.hyperbolic_model || data?.result);
@@ -5633,6 +5636,7 @@ function parseAndSaveLogprobs(data, continueFrom) {
                 case textgen_types.LLAMACPP: {
                     logprobs = data?.completion_probabilities?.map(x => parseTextgenLogprobs(x.content, [x])) || null;
                 } break;
+                case textgen_types.NEBIUS:
                 case textgen_types.HYPERBOLIC:
 
                 case textgen_types.KOBOLDCPP:
@@ -8733,6 +8737,16 @@ const swipe_right = () => {
 };
 
 const CONNECT_API_MAP = {
+    'nebius': {
+        selected: 'openai',
+        button: '#api_button_openai',
+        source: chat_completion_sources.NEBIUS,
+    },
+    'nebius-text': {
+        selected: 'textgenerationwebui',
+        button: '#api_button_textgenerationwebui',
+        source: textgen_types.NEBIUS,
+    },
     'xai': {
         selected: 'openai',
         button: '#api_button_openai',
@@ -10233,6 +10247,7 @@ jQuery(async function () {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_nebius_tg', secret: SECRET_KEYS.NEBIUS },
             { id: 'api_key_xai_tg', secret: SECRET_KEYS.XAI },
             { id: 'api_key_hyperbolic_tg', secret: SECRET_KEYS.HYPERBOLIC },
 

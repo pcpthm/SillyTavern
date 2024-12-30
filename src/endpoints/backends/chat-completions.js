@@ -39,6 +39,7 @@ import {
     TEXT_COMPLETION_MODELS,
 } from '../tokenizers.js';
 
+const API_NEBIUS = 'https://api.studio.nebius.ai/v1';
 const API_XAI = 'https://api.x.ai/v1';
 const API_HYPERBOLIC = 'https://api.hyperbolic.xyz/v1';
 const API_SAMBANOVA = 'https://fast-api.snova.ai/v1';
@@ -649,7 +650,11 @@ router.post('/status', jsonParser, async function (request, response_getstatus_o
     let api_key_openai;
     let headers;
 
-    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.XAI) {
+    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.NEBIUS) {
+        api_url = API_NEBIUS;
+        api_key_openai = readSecret(request.user.directories, SECRET_KEYS.NEBIUS);
+        headers = {};
+    } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.XAI) {
         api_url = API_XAI;
         api_key_openai = readSecret(request.user.directories, SECRET_KEYS.XAI);
         headers = {};
@@ -861,7 +866,17 @@ router.post('/generate', jsonParser, function (request, response) {
     let bodyParams;
     const isTextCompletion = Boolean(request.body.model && TEXT_COMPLETION_MODELS.includes(request.body.model)) || typeof request.body.messages === 'string';
 
-    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.XAI) {
+    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.NEBIUS) {
+        apiUrl = API_NEBIUS;
+        apiKey = readSecret(request.user.directories, SECRET_KEYS.NEBIUS);
+        headers = {};
+        bodyParams = {
+            min_p: request.body.min_p,
+            repetition_penalty: request.body.repetition_penalty,
+            logprobs: request.body.logprobs > 0,
+            top_logprobs: request.body.logprobs || undefined,
+        };
+    } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.XAI) {
         apiUrl = API_XAI;
         apiKey = readSecret(request.user.directories, SECRET_KEYS.XAI);
         headers = {};

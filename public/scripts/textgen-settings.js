@@ -19,6 +19,7 @@ import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, getTextTokens, tokenizers } from
 import { getSortableDelay, onlyUnique, arraysEqual } from './utils.js';
 
 export const textgen_types = {
+    NEBIUS: 'nebius',
     XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
 
@@ -40,6 +41,7 @@ export const textgen_types = {
 };
 
 const {
+    NEBIUS,
     XAI,
     HYPERBOLIC,
 
@@ -109,6 +111,7 @@ const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let NEBIUS_SERVER = 'https://api.studio.nebius.ai/v1';
 let XAI_SERVER = 'https://api.x.ai/v1';
 let HYPERBOLIC_SERVER = 'https://api.hyperbolic.xyz/v1';
 
@@ -198,6 +201,7 @@ const settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    nebius_model: 'meta-llama/Meta-Llama-3.1-70B-Instruct',
     xai_model: 'grok-beta',
     hyperbolic_model: 'meta-llama/Meta-Llama-3.1-405B-Instruct',
 
@@ -326,6 +330,8 @@ export function validateTextGenUrl() {
 
 export function getTextGenServer() {
     switch (settings.type) {
+        case NEBIUS:
+            return NEBIUS_SERVER;
         case XAI:
             return XAI_SERVER;
         case HYPERBOLIC:
@@ -524,6 +530,7 @@ export function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#nebius_model').val(settings.nebius_model);
     $('#xai_model').val(settings.xai_model);
     $('#hyperbolic_model').val(settings.hyperbolic_model);
 
@@ -707,7 +714,7 @@ jQuery(function () {
         const type = String($(this).val());
         settings.type = type;
 
-        if ([HYPERBOLIC, VLLM, APHRODITE, INFERMATICAI].includes(settings.type)) {
+        if ([NEBIUS, HYPERBOLIC, VLLM, APHRODITE, INFERMATICAI].includes(settings.type)) {
             $('#mirostat_mode_textgenerationwebui').attr('step', 2); //Aphro disallows mode 1
             $('#do_sample_textgenerationwebui').prop('checked', true); //Aphro should always do sample; 'otherwise set temp to 0 to mimic no sample'
             $('#ban_eos_token_textgenerationwebui').prop('checked', false); //Aphro should not ban EOS, just ignore it; 'add token '2' to ban list do to this'
@@ -1044,6 +1051,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (settings.type) {
+        case NEBIUS:
         case XAI:
         case HYPERBOLIC:
 
@@ -1150,6 +1158,8 @@ function toIntArray(string) {
 
 export function getTextGenModel() {
     switch (settings.type) {
+        case NEBIUS:
+            return settings.nebius_model;
         case XAI:
             return settings.xai_model;
         case HYPERBOLIC:
@@ -1389,6 +1399,10 @@ export function getTextGenGenerationData(finalPrompt, maxTokens, isImpersonate, 
             : undefined,
     };
 
+    if (settings.type === NEBIUS) {
+        params.best_of = vllmParams.n;
+    }
+
     if (settings.type === OPENROUTER) {
         params.provider = settings.openrouter_providers;
         params.allow_fallbacks = settings.openrouter_allow_fallbacks;
@@ -1421,6 +1435,7 @@ export function getTextGenGenerationData(finalPrompt, maxTokens, isImpersonate, 
     }
 
     switch (settings.type) {
+        case NEBIUS:
         case XAI:
         case HYPERBOLIC:
 

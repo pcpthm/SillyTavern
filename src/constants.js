@@ -160,6 +160,7 @@ export const GEMINI_SAFETY = [
 ];
 
 export const CHAT_COMPLETION_SOURCES = {
+    NEBIUS: 'nebius',
     XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
     SAMBANOVA: 'sambanova',
@@ -189,6 +190,7 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    NEBIUS: 'nebius',
     XAI: 'xai',
     HYPERBOLIC: 'hyperbolic',
 
@@ -208,6 +210,28 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+export const NEBIUS_KEYS = [
+    'prompt',
+    'model',
+    'frequency_penalty',
+    'logit_bias',
+    'logprobs',
+    'top_logprobs',
+    'max_tokens',
+    'n',
+    'presence_penalty',
+    'seed',
+    'stop',
+    'stream',
+    'temperature',
+    'top_p',
+    'user',
+    'top_k',
+    'min_p',
+    'repetition_penalty',
+    'best_of',
+];
 
 // https://docs.x.ai/api/endpoints#completions
 export const XAI_KEYS = [
