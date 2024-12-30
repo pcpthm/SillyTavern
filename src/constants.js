@@ -160,6 +160,7 @@ export const GEMINI_SAFETY = [
 ];
 
 export const CHAT_COMPLETION_SOURCES = {
+    HYPERBOLIC: 'hyperbolic',
     SAMBANOVA: 'sambanova',
 
     OPENAI: 'openai',
@@ -187,6 +188,8 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    HYPERBOLIC: 'hyperbolic',
+
     OOBA: 'ooba',
     MANCER: 'mancer',
     VLLM: 'vllm',
@@ -203,6 +206,28 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+// https://docs.hyperbolic.xyz/docs/rest-api
+export const HYPERBOLIC_KEYS = [
+    'prompt',
+    'model',
+    'frequency_penalty',
+    'logit_bias',
+    'logprobs',
+    'top_logprobs',
+    'max_tokens',
+    'n',
+    'presence_penalty',
+    'seed',
+    'stop',
+    'stream',
+    'temperature',
+    'top_p',
+    'user',
+    'top_k',
+    'min_p',
+    'repetition_penalty',
+];
 
 export const INFERMATICAI_KEYS = [
     'model',

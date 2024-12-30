@@ -564,6 +564,13 @@ document.addEventListener('DOMContentLoaded', function () {
         featherlessIsGridView = !featherlessIsGridView;
     });
 });
+
+function onHyperbolicModelSelect() {
+    const modelId = String($('#hyperbolic_model').val());
+    textgen_settings.hyperbolic_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onMancerModelSelect() {
     const modelId = String($('#mancer_model').val());
     textgen_settings.mancer_model = modelId;
@@ -914,6 +921,8 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#hyperbolic_model').on('change', onHyperbolicModelSelect);
+
     $('#mancer_model').on('change', onMancerModelSelect);
     $('#model_togetherai_select').on('change', onTogetherModelSelect);
     $('#model_infermaticai_select').on('change', onInfermaticAIModelSelect);

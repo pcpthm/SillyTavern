@@ -5,6 +5,8 @@ import _ from 'lodash';
 
 import { jsonParser } from '../../express-common.js';
 import {
+    HYPERBOLIC_KEYS,
+
     TEXTGEN_TYPES,
     TOGETHERAI_KEYS,
     OLLAMA_KEYS,
@@ -115,6 +117,8 @@ router.post('/status', jsonParser, async function (request, response) {
         let result = '';
 
         switch (apiType) {
+            case TEXTGEN_TYPES.HYPERBOLIC:
+
             case TEXTGEN_TYPES.GENERIC:
             case TEXTGEN_TYPES.OOBA:
             case TEXTGEN_TYPES.VLLM:
@@ -288,6 +292,8 @@ router.post('/generate', jsonParser, async function (request, response) {
         let url = trimV1(baseUrl);
 
         switch (request.body.api_type) {
+            case TEXTGEN_TYPES.HYPERBOLIC:
+
             case TEXTGEN_TYPES.GENERIC:
             case TEXTGEN_TYPES.VLLM:
             case TEXTGEN_TYPES.FEATHERLESS:
@@ -326,6 +332,11 @@ router.post('/generate', jsonParser, async function (request, response) {
         };
 
         setAdditionalHeaders(request, args, baseUrl);
+
+        if (request.body.api_type === TEXTGEN_TYPES.HYPERBOLIC) {
+            request.body = _.pickBy(request.body, (_, key) => HYPERBOLIC_KEYS.includes(key));
+            args.body = JSON.stringify(request.body);
+        }
 
         if (request.body.api_type === TEXTGEN_TYPES.TOGETHERAI) {
             request.body = _.pickBy(request.body, (_, key) => TOGETHERAI_KEYS.includes(key));

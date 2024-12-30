@@ -1200,7 +1200,9 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgen_settings.type === textgen_types.MANCER) {
+        if (textgen_settings.type === textgen_types.HYPERBOLIC) {
+            setOnlineStatus(textgen_settings.hyperbolic_model || data?.result);
+        } else if (textgen_settings.type === textgen_types.MANCER) {
             loadMancerModels(data?.data);
             setOnlineStatus(textgen_settings.mancer_model);
         } else if (textgen_settings.type === textgen_types.TOGETHERAI) {
@@ -5629,6 +5631,8 @@ function parseAndSaveLogprobs(data, continueFrom) {
                 case textgen_types.LLAMACPP: {
                     logprobs = data?.completion_probabilities?.map(x => parseTextgenLogprobs(x.content, [x])) || null;
                 } break;
+                case textgen_types.HYPERBOLIC:
+
                 case textgen_types.KOBOLDCPP:
                 case textgen_types.VLLM:
                 case textgen_types.INFERMATICAI:
@@ -8727,6 +8731,17 @@ const swipe_right = () => {
 };
 
 const CONNECT_API_MAP = {
+    'hyperbolic': {
+        selected: 'openai',
+        button: '#api_button_openai',
+        source: chat_completion_sources.HYPERBOLIC,
+    },
+    'hyperbolic-text': {
+        selected: 'textgenerationwebui',
+        button: '#api_button_textgenerationwebui',
+        source: textgen_types.HYPERBOLIC,
+    },
+
     // Default APIs not contined inside text gen / chat gen
     'kobold': {
         selected: 'kobold',
@@ -10206,6 +10221,8 @@ jQuery(async function () {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_hyperbolic_tg', secret: SECRET_KEYS.HYPERBOLIC },
+
             { id: 'api_key_mancer', secret: SECRET_KEYS.MANCER },
             { id: 'api_key_vllm', secret: SECRET_KEYS.VLLM },
             { id: 'api_key_aphrodite', secret: SECRET_KEYS.APHRODITE },
