@@ -2239,7 +2239,7 @@ function parseChatCompletionLogprobs(data) {
         case chat_completion_sources.OPENAI:
         case chat_completion_sources.DEEPSEEK:
         case chat_completion_sources.CUSTOM:
-            if (!data.choices?.length) {
+            if (!data.choices?.length || data.choices[0]?.delta?.role) {
                 return null;
             }
             // OpenAI Text Completion API is treated as a chat completion source
