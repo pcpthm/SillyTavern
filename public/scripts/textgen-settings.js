@@ -19,6 +19,7 @@ import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, getTextTokens, tokenizers } from
 import { getSortableDelay, onlyUnique, arraysEqual } from './utils.js';
 
 export const textgen_types = {
+    FIREWORKS: 'fireworks',
     DEEPSEEK: "deepseek",
     GLHF: 'glhf',
     NEBIUS: 'nebius',
@@ -43,6 +44,7 @@ export const textgen_types = {
 };
 
 const {
+    FIREWORKS,
     DEEPSEEK,
     GLHF,
     NEBIUS,
@@ -115,6 +117,7 @@ const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let FIREWORKS_SERVER = 'https://api.fireworks.ai/inference/v1';
 let DEEPSEEK_SERVER = "https://api.deepseek.com/beta";
 let GLHF_SERVER = 'https://glhf.chat/api/openai/v1';
 let NEBIUS_SERVER = 'https://api.studio.nebius.ai/v1';
@@ -207,6 +210,7 @@ const settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    fireworks_model: 'accounts/fireworks/models/deepseek-v3',
     deepseek_model: 'deepseek-chat',
     glhf_model: 'hf:mistralai/Mistral-7B-Instruct-v0.3',
     nebius_model: 'meta-llama/Meta-Llama-3.1-70B-Instruct',
@@ -338,6 +342,8 @@ export function validateTextGenUrl() {
 
 export function getTextGenServer() {
     switch (settings.type) {
+        case FIREWORKS:
+            return FIREWORKS_SERVER;
         case DEEPSEEK:
             return DEEPSEEK_SERVER;
         case GLHF:
@@ -542,6 +548,7 @@ export function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#fireworks_model').val(settings.fireworks_model);
     $('#deepseek_model').val(settings.deepseek_model);
     $('#glhf_model').val(settings.glhf_model);
     $('#nebius_model').val(settings.nebius_model);
@@ -1065,6 +1072,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (settings.type) {
+        case FIREWORKS:
         case DEEPSEEK:
         case GLHF:
         case NEBIUS:
@@ -1174,6 +1182,8 @@ function toIntArray(string) {
 
 export function getTextGenModel() {
     switch (settings.type) {
+        case FIREWORKS:
+            return settings.fireworks_model;
         case DEEPSEEK:
             return settings.deepseek_model;
         case GLHF:
@@ -1240,7 +1250,7 @@ function isDynamicTemperatureSupported() {
 }
 
 function getLogprobsNumber() {
-    if (settings.type === GLHF || settings.type === VLLM || settings.type === INFERMATICAI) {
+    if (settings.type === FIREWORKS || settings.type === GLHF || settings.type === VLLM || settings.type === INFERMATICAI) {
         return 5;
     }
 
@@ -1419,6 +1429,16 @@ export function getTextGenGenerationData(finalPrompt, maxTokens, isImpersonate, 
             : undefined,
     };
 
+    if (settings.type === FIREWORKS) {
+        params.response_format = settings.json_schema && Object.keys(settings.json_schema).length > 0 ? {
+            type: 'json_object',
+            schema: settings.json_schema,
+        } : settings.grammar_string ? {
+            type: 'grammar',
+            grammar: settings.grammar_string,
+        } : undefined;
+    }
+
     if (settings.type === NEBIUS) {
         params.best_of = vllmParams.n;
     }
@@ -1455,6 +1475,7 @@ export function getTextGenGenerationData(finalPrompt, maxTokens, isImpersonate, 
     }
 
     switch (settings.type) {
+        case FIREWORKS:
         case GLHF:
         case NEBIUS:
         case XAI:

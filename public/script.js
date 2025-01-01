@@ -237,7 +237,7 @@ import {
 import { getBackgrounds, initBackgrounds, loadBackgroundSettings, background_settings } from './scripts/backgrounds.js';
 import { hideLoader, showLoader } from './scripts/loader.js';
 import { BulkEditOverlay, CharacterContextMenu } from './scripts/BulkEditOverlay.js';
-import { loadGLHFModels, loadNebiusModels, loadFeatherlessModels, loadMancerModels, loadOllamaModels, loadTogetherAIModels, loadInfermaticAIModels, loadOpenRouterModels, loadVllmModels, loadAphroditeModels, loadDreamGenModels, initTextGenModels, loadTabbyModels, loadGenericModels } from './scripts/textgen-models.js';
+import { loadFireworksModels, loadGLHFModels, loadNebiusModels, loadFeatherlessModels, loadMancerModels, loadOllamaModels, loadTogetherAIModels, loadInfermaticAIModels, loadOpenRouterModels, loadVllmModels, loadAphroditeModels, loadDreamGenModels, initTextGenModels, loadTabbyModels, loadGenericModels } from './scripts/textgen-models.js';
 import { appendFileContent, hasPendingFileAttachment, populateFileAttachment, decodeStyleTags, encodeStyleTags, isExternalMediaAllowed, getCurrentEntityId, preserveNeutralChat, restoreNeutralChat } from './scripts/chats.js';
 import { getPresetManager, initPresetManager } from './scripts/preset-manager.js';
 import { evaluateMacros, getLastMessageId, initMacros } from './scripts/macros.js';
@@ -1206,7 +1206,10 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgen_settings.type == textgen_types.DEEPSEEK) {
+        if (textgen_settings.type === textgen_types.FIREWORKS) {
+            loadFireworksModels(data?.data);
+            setOnlineStatus(textgen_settings.fireworks_model || data?.result);
+        } else if (textgen_settings.type == textgen_types.DEEPSEEK) {
             setOnlineStatus(textgen_settings.deepseek_model || data?.result);
         } else if (textgen_settings.type == textgen_types.GLHF) {
             loadGLHFModels(data?.data);
@@ -5647,6 +5650,7 @@ function parseAndSaveLogprobs(data, continueFrom) {
                 case textgen_types.LLAMACPP: {
                     logprobs = data?.completion_probabilities?.map(x => parseTextgenLogprobs(x.content, [x])) || null;
                 } break;
+                case textgen_types.FIREWORKS:
                 case textgen_types.GLHF:
                 case textgen_types.NEBIUS:
                 case textgen_types.HYPERBOLIC:
@@ -8749,6 +8753,16 @@ const swipe_right = () => {
 };
 
 const CONNECT_API_MAP = {
+    'fireworks': {
+        selected: 'openai',
+        button: '#api_button_openai',
+        source: chat_completion_sources.FIREWORKS,
+    },
+    'fireworks-text': {
+        selected: 'textgenerationwebui',
+        button: '#api_button_textgenerationwebui',
+        source: textgen_types.FIREWORKS,
+    },
     'deepseek': {
         selected: 'openai',
         button: '#api_button_openai',
@@ -10274,6 +10288,7 @@ jQuery(async function () {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_fireworks_tg', secret: SECRET_KEYS.FIREWORKS },
             { id: 'api_key_deepseek_tg', secret: SECRET_KEYS.DEEPSEEK },
             { id: 'api_key_glhf_tg', secret: SECRET_KEYS.GLHF },
             { id: 'api_key_nebius_tg', secret: SECRET_KEYS.NEBIUS },
