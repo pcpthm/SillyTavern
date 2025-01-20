@@ -2141,6 +2141,15 @@ async function sendOpenAIRequest(type, messages, signal) {
     // https://api-docs.deepseek.com/api/create-chat-completion
     if (isDeepSeek) {
         generate_data.top_p = generate_data.top_p || Number.EPSILON;
+
+        if (oai_settings.deepseek_model === 'deepseek-reasoner') {
+            delete generate_data.temperature;
+            delete generate_data.top_p;
+            delete generate_data.presence_penalty;
+            delete generate_data.frequency_penalty;
+            delete generate_data.logprobs;
+            delete generate_data.top_logprobs;
+        }
     }
 
     if ((isNebius || isXAI || isHyperbolic || isOAI || isOpenRouter || isMistral || isCustom || isCohere || isNano) && oai_settings.seed >= 0) {
@@ -2247,6 +2256,9 @@ function getStreamingReply(data) {
         return data?.candidates?.[0]?.content?.parts?.filter(x => oai_settings.show_thoughts || !x.thought)?.map(x => x.text)?.filter(x => x)?.join('\n\n') || '';
     } else if (oai_settings.chat_completion_source === chat_completion_sources.COHERE) {
         return data?.delta?.message?.content?.text || data?.delta?.message?.tool_plan || '';
+    } else if (oai_settings.chat_completion_source === chat_completion_sources.DEEPSEEK) {
+        const delta = data.choices?.[0]?.delta;
+        return (oai_settings.show_thoughts ? delta?.reasoning_content : null) ?? delta?.content ?? '';
     } else {
         return data.choices?.[0]?.delta?.content ?? data.choices?.[0]?.message?.content ?? data.choices?.[0]?.text ?? '';
     }
