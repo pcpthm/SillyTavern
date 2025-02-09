@@ -3,6 +3,8 @@ import { callPopup, getRequestHeaders } from '../script.js';
 import { t } from './i18n.js';
 
 export const SECRET_KEYS = {
+    SAMBANOVA: 'api_key_sambanova',
+
     HORDE: 'api_key_horde',
     MANCER: 'api_key_mancer',
     VLLM: 'api_key_vllm',
@@ -46,6 +48,8 @@ export const SECRET_KEYS = {
 };
 
 const INPUT_MAP = {
+    [SECRET_KEYS.SAMBANOVA]: '#api_key_sambanova',
+
     [SECRET_KEYS.HORDE]: '#horde_api_key',
     [SECRET_KEYS.MANCER]: '#api_key_mancer',
     [SECRET_KEYS.OPENAI]: '#api_key_openai',

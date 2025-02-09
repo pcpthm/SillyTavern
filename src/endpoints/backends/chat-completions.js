@@ -44,6 +44,8 @@ import {
     getWebTokenizer,
 } from '../tokenizers.js';
 
+const API_SAMBANOVA = 'https://fast-api.snova.ai/v1';
+
 const API_OPENAI = 'https://api.openai.com/v1';
 const API_CLAUDE = 'https://api.anthropic.com/v1';
 const API_MISTRAL = 'https://api.mistral.ai/v1';
@@ -1220,7 +1222,12 @@ router.post('/generate', function (request, response) {
             getPromptNames(request));
     }
 
-    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.OPENAI) {
+    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.SAMBANOVA) {
+        apiUrl = API_SAMBANOVA;
+        apiKey = readSecret(request.user.directories, SECRET_KEYS.SAMBANOVA);
+        headers = {};
+        bodyParams = {};
+    } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.OPENAI) {
         apiUrl = new URL(request.body.reverse_proxy || API_OPENAI).toString();
         apiKey = request.body.reverse_proxy ? request.body.proxy_password : readSecret(request.user.directories, SECRET_KEYS.OPENAI);
         headers = {};

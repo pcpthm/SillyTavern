@@ -161,6 +161,8 @@ export const GEMINI_SAFETY = [
 ];
 
 export const CHAT_COMPLETION_SOURCES = {
+    SAMBANOVA: 'sambanova',
+
     OPENAI: 'openai',
     WINDOWAI: 'windowai',
     CLAUDE: 'claude',
