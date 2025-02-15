@@ -1247,6 +1247,8 @@ router.post('/generate', function (request, response) {
             'transforms': getOpenRouterTransforms(request),
             'plugins': getOpenRouterPlugins(request),
             'include_reasoning': Boolean(request.body.include_reasoning),
+            logprobs: request.body.logprobs > 0,
+            top_logprobs: request.body.logprobs || undefined,
         };
 
         if (request.body.min_p !== undefined) {

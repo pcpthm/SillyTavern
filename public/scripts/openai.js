@@ -2131,7 +2131,7 @@ async function sendOpenAIRequest(type, messages, signal) {
     }
 
     // Add logprobs request (currently OpenAI only, max 5 on their side)
-    if (useLogprobs && (isOAI || isCustom || isDeepSeek || isXAI)) {
+    if (useLogprobs) {
         generate_data['logprobs'] = 5;
     }
 
@@ -2432,23 +2432,14 @@ function parseChatCompletionLogprobs(data) {
         return null;
     }
 
-    switch (oai_settings.chat_completion_source) {
-        case chat_completion_sources.OPENAI:
-        case chat_completion_sources.DEEPSEEK:
-        case chat_completion_sources.XAI:
-        case chat_completion_sources.CUSTOM:
-            if (!data.choices?.length) {
-                return null;
-            }
-            // OpenAI Text Completion API is treated as a chat completion source
-            // by SillyTavern, hence its presence in this function.
-            return textCompletionModels.includes(oai_settings.openai_model)
-                ? parseOpenAITextLogprobs(data.choices[0]?.logprobs)
-                : parseOpenAIChatLogprobs(data.choices[0]?.logprobs);
-        default:
-        // implement other chat completion sources here
+    if (!data.choices?.length) {
+        return null;
     }
-    return null;
+    // OpenAI Text Completion API is treated as a chat completion source
+    // by SillyTavern, hence its presence in this function.
+    return oai_settings.chat_completion_source == chat_completion_sources.OPENAI && textCompletionModels.includes(oai_settings.openai_model)
+        ? parseOpenAITextLogprobs(data.choices[0]?.logprobs)
+        : parseOpenAIChatLogprobs(data.choices[0]?.logprobs);
 }
 
 /**

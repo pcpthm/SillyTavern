@@ -350,6 +350,8 @@ export const OPENROUTER_KEYS = [
     'top_a',
     'seed',
     'logit_bias',
+    'logprobs',
+    'top_logprobs',
     'model',
     'stream',
     'prompt',

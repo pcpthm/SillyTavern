@@ -1001,7 +1001,7 @@ function setSettingByName(setting, value, trigger) {
  * Sends a streaming request for textgenerationwebui.
  * @param generate_data
  * @param signal
- * @returns {Promise<(function(): AsyncGenerator<{swipes: [], text: string, toolCalls: [], logprobs: {token: string, topLogprobs: Candidate[]}|null}, void, *>)|*>}
+ * @returns {Promise<(function(): AsyncGenerator<{swipes: [], text: string, toolCalls: [], logprobs: import('./logprobs.js').TokenLogprobs[]|null}, void, *>)|*>}
  * @throws {Error} - If the response status is not OK, or from within the generator
  */
 export async function generateTextGenWithStreaming(generate_data, signal) {
@@ -1027,7 +1027,7 @@ export async function generateTextGenWithStreaming(generate_data, signal) {
 
     return async function* streamData() {
         let text = '';
-        /** @type {import('./logprobs.js').TokenLogprobs | null} */
+        /** @type {import('./logprobs.js').TokenLogprobs[] | null} */
         let logprobs = null;
         const swipes = [];
         const toolCalls = [];
@@ -1058,11 +1058,10 @@ export async function generateTextGenWithStreaming(generate_data, signal) {
 
 /**
  * parseTextgenLogprobs converts a logprobs object returned from a textgen API
- * for a single token into a TokenLogprobs object used by the Token
- * Probabilities feature.
+ * to TokenLogprobs objects used by the Token Probabilities feature.
  * @param {string} token - the text of the token that the logprobs are for
  * @param {Object} logprobs - logprobs object returned from the API
- * @returns {import('./logprobs.js').TokenLogprobs | null} - converted logprobs
+ * @returns {import('./logprobs.js').TokenLogprobs[] | null} - converted logprobs
  */
 export function parseTextgenLogprobs(token, logprobs) {
     if (!logprobs) {
@@ -1074,16 +1073,22 @@ export function parseTextgenLogprobs(token, logprobs) {
         case TABBY:
         case VLLM:
         case APHRODITE:
+        case OPENROUTER:
         case MANCER:
         case INFERMATICAI:
         case OOBA: {
-            /** @type {Record<string, number>[]} */
-            const topLogprobs = logprobs.top_logprobs;
-            if (!topLogprobs?.length) {
+            /** @type {string[]} */
+            const tokens = logprobs.content?.map(x => x.token) ?? logprobs.tokens;
+            const topLogprobs = logprobs.content?.map(x => x.top_logprobs) ?? logprobs.top_logprobs;
+            if (!tokens?.length || !topLogprobs?.length) {
                 return null;
             }
-            const candidates = Object.entries(topLogprobs[0]);
-            return { token, topLogprobs: candidates };
+            return tokens.map((token, i) => ({
+                token,
+                topLogprobs: Array.isArray(topLogprobs[i])
+                    ? topLogprobs[i].map(({ token, logprob }) => [token, logprob])
+                    : Object.entries(topLogprobs[i]),
+            }))
         }
         case LLAMACPP: {
             if (!logprobs?.length) {
@@ -1101,13 +1106,13 @@ export function parseTextgenLogprobs(token, logprobs) {
                 if (!candidates) {
                     return null;
                 }
-                return { token, topLogprobs: candidates };
+                return [{ token, topLogprobs: candidates }];
             } else if (logprobs?.[0].top_logprobs) {
                 const candidates = logprobs?.[0]?.top_logprobs?.map(x => [x.token, Math.exp(x.logprob)]);
                 if (!candidates) {
                     return null;
                 }
-                return { token, topLogprobs: candidates };
+                return [{ token, topLogprobs: candidates }];
             }
             return null;
         }
@@ -1234,7 +1239,7 @@ function isDynamicTemperatureSupported() {
  */
 export function getLogprobsNumber(type = null) {
     const selectedType = type ?? settings.type;
-    if (selectedType === VLLM || selectedType === INFERMATICAI) {
+    if (selectedType === VLLM || selectedType === INFERMATICAI || selectedType === OPENROUTER) {
         return 5;
     }
 

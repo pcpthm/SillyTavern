@@ -357,6 +357,10 @@ router.post('/generate', async function (request, response) {
             } else {
                 delete request.body.provider;
             }
+            if (request.body.logprobs) {
+                request.body.top_logprobs = request.body.logprobs;
+                request.body.logprobs = true;
+            }
             request.body = _.pickBy(request.body, (_, key) => OPENROUTER_KEYS.includes(key));
             args.body = JSON.stringify(request.body);
         }
