@@ -439,7 +439,7 @@ comfy.post('/models', async (request, response) => {
         models.forEach(it => it.text = it.text.replace(/\.[^.]*$/, '').replace(/_/g, ' '));
 
         return response.send(models);
-    } catch (error)     {
+    } catch (error) {
         console.error(error);
         return response.sendStatus(500);
     }
@@ -1324,6 +1324,72 @@ xai.post('/generate', async (request, response) => {
     }
 });
 
+const chutes = express.Router();
+
+chutes.post('/generate', async (request, response) => {
+    try {
+        const key = readSecret(request.user.directories, SECRET_KEYS.CHUTES);
+
+        if (!key) {
+            console.warn('Chutes key not found.');
+            return response.sendStatus(400);
+        }
+
+        if (typeof request.body.model !== 'string' || /[^A-Za-z0-9-]/.exec(request.body.model)) {
+            console.warn('Invalid Chutes model');
+            return response.sendStatus(400);
+        }
+
+        const url = `https://${request.body.model}.chutes.ai/generate`;
+        const requestBody = {
+            prompt: request.body.prompt,
+            negative_prompt: request.body.negative_prompt,
+            guidance_scale: request.body.scale,
+            width: request.body.width,
+            height: request.body.height,
+            num_inference_steps: request.body.steps,
+            seed: request.body.seed,
+        };
+        if (request.body.model === 'chutes-hidream') {
+            const allowedResolutions = ["1024x1024", "768x1360", "1360x768", "880x1168", "1168x880", "1248x832", "832x1248"];
+            let minRatio = Infinity;
+            for (const resolution of allowedResolutions) {
+                const [height, width] = resolution.split("x");
+                const ratio = Math.abs(Math.log((parseInt(height) / parseInt(width)) / (request.body.height / request.body.width)));
+                if (ratio < minRatio)
+                    minRatio = ratio, requestBody.resolution = resolution;
+            }
+            requestBody.width = requestBody.height = undefined;
+            requestBody.negative_prompt = undefined;
+        }
+
+        console.debug('Chutes request:', url, requestBody);
+
+        const result = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${key}`,
+            },
+        });
+
+        if (!result.ok) {
+            const text = await result.text();
+            console.warn('Chutes returned an error.', text);
+            return response.sendStatus(500);
+        }
+
+        const buffer = await result.arrayBuffer();
+        return response.send({
+            image: Buffer.from(buffer).toString('base64'),
+        });
+    } catch (error) {
+        console.error('Error communicating with Chutes', error);
+        return response.sendStatus(500);
+    }
+});
+
 router.use('/comfy', comfy);
 router.use('/together', together);
 router.use('/drawthings', drawthings);
@@ -1334,3 +1400,4 @@ router.use('/nanogpt', nanogpt);
 router.use('/bfl', bfl);
 router.use('/falai', falai);
 router.use('/xai', xai);
+router.use('/chutes', chutes);

@@ -82,6 +82,7 @@ const sources = {
     bfl: 'bfl',
     falai: 'falai',
     xai: 'xai',
+    chutes: 'chutes',
 };
 
 const initiators = {
@@ -1305,6 +1306,7 @@ async function onModelChange() {
         sources.bfl,
         sources.falai,
         sources.xai,
+        sources.chutes,
     ];
 
     if (cloudSources.includes(extension_settings.sd.source)) {
@@ -1523,6 +1525,9 @@ async function loadSamplers() {
         case sources.xai:
             samplers = ['N/A'];
             break;
+        case sources.chutes:
+            samplers = ['N/A'];
+            break;
     }
 
     for (const sampler of samplers) {
@@ -1716,6 +1721,9 @@ async function loadModels() {
         case sources.xai:
             models = await loadXAIModels();
             break;
+        case sources.chutes:
+            models = await loadChutesModels();
+            break;
     }
 
     for (const model of models) {
@@ -1771,6 +1779,12 @@ async function loadFalaiModels() {
 async function loadXAIModels() {
     return [
         { value: 'grok-2-image-1212', text: 'grok-2-image-1212' },
+    ];
+}
+
+async function loadChutesModels() {
+    return [
+        { value: 'chutes-hidream', text: 'Hidream' },
     ];
 }
 
@@ -2098,6 +2112,9 @@ async function loadSchedulers() {
         case sources.xai:
             schedulers = ['N/A'];
             break;
+        case sources.chutes:
+            schedulers = ['N/A'];
+            break;
     }
 
     for (const scheduler of schedulers) {
@@ -2187,6 +2204,9 @@ async function loadVaes() {
             vaes = ['N/A'];
             break;
         case sources.xai:
+            vaes = ['N/A'];
+            break;
+        case sources.chutes:
             vaes = ['N/A'];
             break;
     }
@@ -2760,6 +2780,9 @@ async function sendGenerationRequest(generationType, prompt, additionalNegativeP
                 break;
             case sources.xai:
                 result = await generateXAIImage(prefixedPrompt, negativePrompt, signal);
+                break;
+            case sources.chutes:
+                result = await generateChutesImage(prefixedPrompt, negativePrompt, signal);
                 break;
         }
 
@@ -3442,8 +3465,6 @@ async function generateNanoGPTImage(prompt, negativePrompt, signal) {
             scale: parseFloat(extension_settings.sd.scale),
             width: parseInt(extension_settings.sd.width),
             height: parseInt(extension_settings.sd.height),
-            resolution: `${extension_settings.sd.width}x${extension_settings.sd.height}`,
-            showExplicitContent: true,
             nImages: 1,
         }),
     });
@@ -3504,6 +3525,39 @@ async function generateXAIImage(prompt, _negativePrompt, signal) {
         body: JSON.stringify({
             prompt: prompt,
             model: extension_settings.sd.model,
+        }),
+    });
+
+    if (result.ok) {
+        const data = await result.json();
+        return { format: 'jpg', data: data.image };
+    } else {
+        const text = await result.text();
+        throw new Error(text);
+    }
+}
+
+/**
+ * Generates an image using the Chutes API.
+ * @param {string} prompt The main instruction used to guide the image generation.
+ * @param {string} negativePrompt Negative prompt is not used in this API
+ * @param {AbortSignal} signal An AbortSignal object that can be used to cancel the request.
+ * @returns {Promise<{format: string, data: string}>} A promise that resolves when the image generation and processing are complete.
+ */
+async function generateChutesImage(prompt, negativePrompt, signal) {
+    const result = await fetch('/api/sd/chutes/generate', {
+        method: 'POST',
+        headers: getRequestHeaders(),
+        signal: signal,
+        body: JSON.stringify({
+            model: extension_settings.sd.model,
+            prompt: prompt,
+            negative_prompt: negativePrompt,
+            steps: parseInt(extension_settings.sd.steps),
+            scale: parseFloat(extension_settings.sd.scale),
+            width: parseInt(extension_settings.sd.width),
+            height: parseInt(extension_settings.sd.height),
+            seed: extension_settings.sd.seed >= 0 ? extension_settings.sd.seed : undefined,
         }),
     });
 
@@ -3837,6 +3891,8 @@ function isValidState() {
             return secret_state[SECRET_KEYS.FALAI];
         case sources.xai:
             return secret_state[SECRET_KEYS.XAI];
+        case sources.chutes:
+            return secret_state[SECRET_KEYS.CHUTES];
     }
 }
 
