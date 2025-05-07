@@ -80,6 +80,22 @@ const OPENROUTER_PROVIDERS = [
     'xAI',
 ];
 
+export async function loadChutesModels(data) {
+    if (!Array.isArray(data)) {
+        console.error('Invalid Chutes models data', data);
+        return;
+    }
+
+    $('#chutes_model').empty();
+    for (const model of data) {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.text = model.id;
+        option.selected = model.id === textgen_settings.chutes_model;
+        $('#chutes_model').append(option);
+    }
+}
+
 export async function loadFireworksModels(data) {
     if (!Array.isArray(data)) {
         console.error('Invalid Fireworks models data', data);
@@ -656,6 +672,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function onChutesModelSelect() {
+    const modelId = String($('#chutes_model').val());
+    textgen_settings.chutes_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onFireworksModelSelect() {
     const modelId = String($('#fireworks_model').val());
     textgen_settings.fireworks_model = modelId;
@@ -1053,6 +1075,7 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#chutes_model').on('change', onChutesModelSelect);
     $('#fireworks_model').on('change', onFireworksModelSelect);
     $('#deepseek_model').on('change', onDeepSeekModelSelect);
     $('#glhf_model').on('change', onGLHFModelChange);

@@ -20,6 +20,7 @@ import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, getTextTokens, tokenizers } from
 import { getSortableDelay, onlyUnique, arraysEqual } from './utils.js';
 
 export const textgen_types = {
+    CHUTES: 'chutes',
     FIREWORKS: 'fireworks',
     DEEPSEEK: "deepseek",
     GLHF: 'glhf',
@@ -45,6 +46,7 @@ export const textgen_types = {
 };
 
 const {
+    CHUTES,
     FIREWORKS,
     DEEPSEEK,
     GLHF,
@@ -119,6 +121,7 @@ export const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let CHUTES_SERVER = 'https://llm.chutes.ai/v1';
 let FIREWORKS_SERVER = 'https://api.fireworks.ai/inference/v1';
 let DEEPSEEK_SERVER = "https://api.deepseek.com/beta";
 let GLHF_SERVER = 'https://glhf.chat/api/openai/v1';
@@ -215,6 +218,7 @@ const settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    chutes_model: '',
     fireworks_model: '',
     deepseek_model: '',
     glhf_model: '',
@@ -358,6 +362,8 @@ export function validateTextGenUrl() {
 export function getTextGenServer(type = null) {
     const selectedType = type ?? settings.type;
     switch (selectedType) {
+        case CHUTES:
+            return CHUTES_SERVER;
         case FIREWORKS:
             return FIREWORKS_SERVER;
         case DEEPSEEK:
@@ -577,6 +583,7 @@ export function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#chutes_model').val(settings.chutes_model);
     $('#fireworks_model').val(settings.fireworks_model);
     $('#deepseek_model').val(settings.deepseek_model);
     $('#glhf_model').val(settings.glhf_model);
@@ -772,7 +779,7 @@ jQuery(function () {
         const type = String($(this).val());
         settings.type = type;
 
-        if ([NEBIUS, HYPERBOLIC, VLLM, APHRODITE, INFERMATICAI].includes(settings.type)) {
+        if ([CHUTES, NEBIUS, HYPERBOLIC, VLLM, APHRODITE, INFERMATICAI].includes(settings.type)) {
             $('#mirostat_mode_textgenerationwebui').attr('step', 2); //Aphro disallows mode 1
             $('#do_sample_textgenerationwebui').prop('checked', true); //Aphro should always do sample; 'otherwise set temp to 0 to mimic no sample'
             $('#ban_eos_token_textgenerationwebui').prop('checked', false); //Aphro should not ban EOS, just ignore it; 'add token '2' to ban list do to this'
@@ -1118,6 +1125,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (settings.type) {
+        case CHUTES:
         case FIREWORKS:
         case DEEPSEEK:
         case GLHF:
@@ -1234,6 +1242,8 @@ function toIntArray(string) {
 
 export function getTextGenModel() {
     switch (settings.type) {
+        case CHUTES:
+            return settings.chutes_model;
         case FIREWORKS:
             return settings.fireworks_model;
         case DEEPSEEK:
@@ -1505,6 +1515,10 @@ export async function getTextGenGenerationData(finalPrompt, maxTokens, isImperso
             : undefined,
     };
 
+    if (settings.type === CHUTES) {
+        params.min_new_tokens = settings.min_length || undefined;
+    }
+
     if (settings.type === FIREWORKS) {
         params.response_format = settings.json_schema && Object.keys(settings.json_schema).length > 0 ? {
             type: 'json_object',
@@ -1563,6 +1577,7 @@ export async function getTextGenGenerationData(finalPrompt, maxTokens, isImperso
     }
 
     switch (settings.type) {
+        case CHUTES:
         case FIREWORKS:
         case GLHF:
         case NEBIUS:

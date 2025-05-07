@@ -4,6 +4,7 @@ import express from 'express';
 import _ from 'lodash';
 
 import {
+    CHUTES_KEYS,
     FIREWORKS_KEYS,
     DEEPSEEK_KEYS,
     GLHF_KEYS,
@@ -124,6 +125,7 @@ router.post('/status', async function (request, response) {
                 url = url.replace(/\/beta$/, "") + '/models';
                 break;
 
+            case TEXTGEN_TYPES.CHUTES:
             case TEXTGEN_TYPES.FIREWORKS:
             case TEXTGEN_TYPES.GLHF:
             case TEXTGEN_TYPES.NEBIUS:
@@ -301,6 +303,7 @@ router.post('/generate', async function (request, response) {
         let url = trimV1(baseUrl);
 
         switch (request.body.api_type) {
+            case TEXTGEN_TYPES.CHUTES:
             case TEXTGEN_TYPES.FIREWORKS:
             case TEXTGEN_TYPES.DEEPSEEK:
             case TEXTGEN_TYPES.GLHF:
@@ -346,6 +349,11 @@ router.post('/generate', async function (request, response) {
         };
 
         setAdditionalHeaders(request, args, baseUrl);
+
+        if (request.body.api_type === TEXTGEN_TYPES.CHUTES) {
+            request.body = _.pickBy(request.body, (_, key) => CHUTES_KEYS.includes(key));
+            args.body = JSON.stringify(request.body);
+        }
 
         if (request.body.api_type === TEXTGEN_TYPES.FIREWORKS) {
             request.body = _.pickBy(request.body, (_, key) => FIREWORKS_KEYS.includes(key));

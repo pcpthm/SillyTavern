@@ -3,6 +3,7 @@ import { callPopup, getRequestHeaders } from '../script.js';
 import { t } from './i18n.js';
 
 export const SECRET_KEYS = {
+    CHUTES: 'api_key_chutes',
     FIREWORKS: 'api_key_fireworks',
     GLHF: 'api_key_glhf',
     NEBIUS: 'api_key_nebius',
@@ -52,6 +53,7 @@ export const SECRET_KEYS = {
 };
 
 const INPUT_MAP = {
+    [SECRET_KEYS.CHUTES]: 'input[name="api_key_chutes"]',
     [SECRET_KEYS.FIREWORKS]: 'input[name="api_key_fireworks"]',
     [SECRET_KEYS.GLHF]: 'input[name="api_key_glhf"]',
     [SECRET_KEYS.NEBIUS]: 'input[name="api_key_nebius"]',

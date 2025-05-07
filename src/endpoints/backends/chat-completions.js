@@ -44,6 +44,7 @@ import {
     getWebTokenizer,
 } from '../tokenizers.js';
 
+const API_CHUTES = 'https://llm.chutes.ai/v1';
 const API_FIREWORKS = 'https://api.fireworks.ai/inference/v1';
 const API_NEBIUS = 'https://api.studio.nebius.ai/v1';
 const API_HYPERBOLIC = 'https://api.hyperbolic.xyz/v1';
@@ -993,7 +994,11 @@ router.post('/status', async function (request, response_getstatus_openai) {
     let api_key_openai;
     let headers;
 
-    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.FIREWORKS) {
+    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.CHUTES) {
+        api_url = API_CHUTES;
+        api_key_openai = readSecret(request.user.directories, SECRET_KEYS.CHUTES);
+        headers = {};
+    } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.FIREWORKS) {
         api_url = API_FIREWORKS;
         api_key_openai = readSecret(request.user.directories, SECRET_KEYS.FIREWORKS);
         headers = {};
@@ -1237,7 +1242,17 @@ router.post('/generate', function (request, response) {
             getPromptNames(request));
     }
 
-    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.FIREWORKS) {
+    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.CHUTES) {
+        apiUrl = API_CHUTES;
+        apiKey = readSecret(request.user.directories, SECRET_KEYS.CHUTES);
+        headers = {};
+        bodyParams = {
+            min_p: request.body.min_p,
+            repetition_penalty: request.body.repetition_penalty,
+            logprobs: request.body.logprobs > 0,
+            top_logprobs: request.body.logprobs || undefined,
+        };
+    } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.FIREWORKS) {
         apiUrl = API_FIREWORKS;
         apiKey = readSecret(request.user.directories, SECRET_KEYS.FIREWORKS);
         headers = {};

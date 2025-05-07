@@ -161,6 +161,7 @@ export const GEMINI_SAFETY = [
 ];
 
 export const CHAT_COMPLETION_SOURCES = {
+    CHUTES: 'chutes',
     FIREWORKS: 'fireworks',
     NEBIUS: 'nebius',
     HYPERBOLIC: 'hyperbolic',
@@ -192,6 +193,7 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    CHUTES: 'chutes',
     FIREWORKS: 'fireworks',
     DEEPSEEK: 'deepseek',
     GLHF: 'glhf',
@@ -215,6 +217,40 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+// <https://github.com/rayonlabs/chutes/blob/main/chutes/chute/template/sglang.py>
+// <https://docs.sglang.ai/backend/sampling_params.html>
+export const CHUTES_KEYS = [
+    'model',
+    'frequency_penalty',
+    'logit_bias',
+    'logprobs',
+    'top_logprobs',
+    'max_tokens',
+    'presence_penalty',
+    'response_format',
+    'seed',
+    'stop',
+    'stream',
+    'temperature',
+    'top_p',
+    'best_of',
+    'use_beam_search',
+    'top_k',
+    'min_p',
+    'repetition_penalty',
+    'length_penalty',
+    'stop_token_ids',
+    'include_stop_str_in_output',
+    'ignore_eos',
+    'min_tokens',
+    'skip_special_tokens',
+    'spaces_between_special_tokens',
+    'prompt_logprobs',
+    'prompt',
+    'min_new_tokens',
+    'n',
+];
 
 // <https://docs.fireworks.ai/api-reference/post-completions>
 export const FIREWORKS_KEYS = [

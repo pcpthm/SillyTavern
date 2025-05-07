@@ -169,6 +169,7 @@ let biasCache = undefined;
 export let model_list = [];
 
 export const chat_completion_sources = {
+    CHUTES: 'chutes',
     FIREWORKS: 'fireworks',
     NEBIUS: 'nebius',
     HYPERBOLIC: 'hyperbolic',
@@ -256,6 +257,7 @@ export const settingsToUpdate = {
     repetition_penalty: ['#repetition_penalty_openai', 'repetition_penalty_openai', false, false],
     max_context_unlocked: ['#oai_max_context_unlocked', 'max_context_unlocked', true, false],
 
+    chutes_model: ['#model_chutes_select', 'chutes_model', false, true],
     fireworks_model: ['#model_fireworks_select', 'fireworks_model', false, true],
     hyperbolic_model: ['#model_hyperbolic_select', 'hyperbolic_model', false, true],
     sambanova_model: ['#model_sambanova_select', 'sambanova_model', false, true],
@@ -359,6 +361,7 @@ const default_settings = {
     scenario_format: default_scenario_format,
     personality_format: default_personality_format,
 
+    chutes_model: '',
     fireworks_model: '',
     nebius_model: '',
     hyperbolic_model: '',
@@ -448,6 +451,7 @@ const oai_settings = {
     scenario_format: default_scenario_format,
     personality_format: default_personality_format,
 
+    chutes_model: default_settings.chutes_model,
     fireworks_model: default_settings.fireworks_model,
     nebius_model: default_settings.nebius_model,
     hyperbolic_model: default_settings.hyperbolic_model,
@@ -1679,6 +1683,8 @@ async function sendWindowAIRequest(messages, signal, stream) {
 export function getChatCompletionModel(source = null) {
     const activeSource = source ?? oai_settings.chat_completion_source;
     switch (activeSource) {
+        case chat_completion_sources.CHUTES:
+            return oai_settings.chutes_model;
         case chat_completion_sources.FIREWORKS:
             return oai_settings.fireworks_model;
         case chat_completion_sources.NEBIUS:
@@ -1777,6 +1783,23 @@ function calculateOpenRouterCost() {
 function saveModelList(data) {
     model_list = data.map((model) => ({ ...model }));
     model_list.sort((a, b) => a?.id && b?.id && a.id.localeCompare(b.id));
+
+    if (oai_settings.chat_completion_source == chat_completion_sources.CHUTES) {
+        $('#model_chutes_select').empty();
+        model_list.forEach((model) => {
+            $('#model_chutes_select').append(
+                $('<option>', {
+                    value: model.id,
+                    text: model.id,
+                }));
+        });
+        const selectedModel = model_list.find(model => model.id === oai_settings.chutes_model);
+        if (model_list.length > 0 && (!selectedModel || !oai_settings.chutes_model)) {
+            oai_settings.chutes_model = model_list[0].id;
+        }
+
+        $('#model_chutes_select').val(oai_settings.chutes_model).trigger('change');
+    }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.FIREWORKS) {
         $('#model_fireworks_select').empty();
@@ -2111,6 +2134,7 @@ async function sendOpenAIRequest(type, messages, signal) {
 
     let logit_bias = {};
 
+    const isChutes = oai_settings.chat_completion_source == chat_completion_sources.CHUTES;
     const isFireworks = oai_settings.chat_completion_source == chat_completion_sources.FIREWORKS;
     const isNebius = oai_settings.chat_completion_source == chat_completion_sources.NEBIUS;
     const isHyperbolic = oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC;
@@ -2137,7 +2161,7 @@ async function sendOpenAIRequest(type, messages, signal) {
     const isContinue = type === 'continue';
     const stream = oai_settings.stream_openai && !isQuiet && !isScale && !(isOAI && ['o1-2024-12-17', 'o1'].includes(oai_settings.openai_model));
     const useLogprobs = !!power_user.request_token_probabilities;
-    const canMultiSwipe = oai_settings.n > 1 && !isContinue && !isImpersonate && !isQuiet && (isFireworks || isNebius || isHyperbolic || isOAI || isCustom || isXAI);
+    const canMultiSwipe = oai_settings.n > 1 && !isContinue && !isImpersonate && !isQuiet && (isChutes || isFireworks || isNebius || isHyperbolic || isOAI || isCustom || isXAI);
 
     // If we're using the window.ai extension, use that instead
     // Doesn't support logit bias yet
@@ -2146,7 +2170,7 @@ async function sendOpenAIRequest(type, messages, signal) {
     }
 
     const logitBiasSources = [chat_completion_sources.OPENAI, chat_completion_sources.OPENROUTER, chat_completion_sources.SCALE, chat_completion_sources.CUSTOM];
-    logitBiasSources.push(chat_completion_sources.HYPERBOLIC, chat_completion_sources.NEBIUS, chat_completion_sources.FIREWORKS);
+    logitBiasSources.push(chat_completion_sources.HYPERBOLIC, chat_completion_sources.NEBIUS, chat_completion_sources.FIREWORKS, chat_completion_sources.CHUTES);
 
     if (oai_settings.bias_preset_selected
         && logitBiasSources.includes(oai_settings.chat_completion_source)
@@ -2218,6 +2242,14 @@ async function sendOpenAIRequest(type, messages, signal) {
     }
     if (isOAI && oai_settings.openai_model.includes('gpt-4.5') || isOpenRouter && oai_settings.openrouter_model.includes('gpt-4.5')) {
         delete generate_data.logprobs;
+    }
+
+    if (isChutes) {
+        generate_data['top_p'] = Number(oai_settings.top_p_openai);
+        generate_data['top_k'] = Number(oai_settings.top_k_openai) || undefined;
+        generate_data['min_p'] = Number(oai_settings.min_p_openai);
+        generate_data['repetition_penalty'] = Number(oai_settings.repetition_penalty_openai);
+        generate_data['stop'] = getCustomStoppingStrings();
     }
 
     if (isFireworks) {
@@ -3448,6 +3480,7 @@ function loadOpenAISettings(data, settings) {
     oai_settings.personality_format = settings.personality_format ?? default_settings.personality_format;
     oai_settings.group_nudge_prompt = settings.group_nudge_prompt ?? default_settings.group_nudge_prompt;
 
+    oai_settings.chutes_model = settings.chutes_model ?? default_settings.chutes_model;
     oai_settings.fireworks_model = settings.fireworks_model ?? default_settings.fireworks_model;
     oai_settings.nebius_model = settings.nebius_model ?? default_settings.nebius_model;
     oai_settings.hyperbolic_model = settings.hyperbolic_model ?? default_settings.hyperbolic_model;
@@ -3534,6 +3567,7 @@ function loadOpenAISettings(data, settings) {
     $('#openai_inline_image_quality').val(oai_settings.inline_image_quality);
     $(`#openai_inline_image_quality option[value="${oai_settings.inline_image_quality}"]`).prop('selected', true);
 
+    $('#model_chutes_select').val(oai_settings.chutes_model);
     $('#model_fireworks_select').val(oai_settings.fireworks_model);
     $('#model_nebius_select').val(oai_settings.nebius_model);
     $('#model_hyperbolic_select').val(oai_settings.hyperbolic_model);
@@ -3833,6 +3867,7 @@ async function saveOpenAIPreset(name, settings, triggerUi = true) {
     const presetBody = {
         chat_completion_source: settings.chat_completion_source,
 
+        chutes_model: settings.chutes_model,
         fireworks_model: settings.fireworks_model,
         nebius_model: settings.nebius_model,
         xai_model: settings.xai_model,
@@ -4573,6 +4608,16 @@ async function onModelChange() {
     biasCache = undefined;
     let value = String($(this).val() || '');
 
+    if ($(this).is('#model_chutes_select')) {
+        if (!value) {
+            console.debug('Null Chutes model selected. Ignoring.');
+            return;
+        }
+
+        console.log('Chutes model changed to', value);
+        oai_settings.chutes_model = value;
+    }
+
     if ($(this).is('#model_fireworks_select')) {
         if (!value) {
             console.debug('Null Fireworks model selected. Ignoring.');
@@ -4717,6 +4762,20 @@ async function onModelChange() {
     if ($(this).is('#model_xai_select')) {
         console.log('XAI model changed to', value);
         oai_settings.xai_model = value;
+    }
+
+    if (oai_settings.chat_completion_source == chat_completion_sources.CHUTES) {
+        if (oai_settings.max_context_unlocked) {
+            $('#openai_max_context').attr('max', unlocked_max);
+        }
+        else {
+            $('#openai_max_context').attr('max', 512000);
+        }
+        oai_settings.openai_max_context = Math.min(Number($('#openai_max_context').attr('max')), oai_settings.openai_max_context);
+        $('#openai_max_context').val(oai_settings.openai_max_context).trigger('input');
+
+        oai_settings.temp_openai = Math.min(oai_max_temp, oai_settings.temp_openai);
+        $('#temp_openai').attr('max', oai_max_temp).val(oai_settings.temp_openai).trigger('input');
     }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.FIREWORKS) {
@@ -4931,6 +4990,9 @@ async function onModelChange() {
         else if (['command-light-nightly', 'command-light', 'command'].includes(oai_settings.cohere_model)) {
             $('#openai_max_context').attr('max', max_4k);
         }
+        else if (oai_settings.cohere_model.includes('command-a')) {
+            $('#openai_max_context').attr('max', max_256k);
+        }
         else if (oai_settings.cohere_model.includes('command-r') || ['c4ai-aya-23', 'c4ai-aya-expanse-32b', 'command-nightly'].includes(oai_settings.cohere_model)) {
             $('#openai_max_context').attr('max', max_128k);
         }
@@ -5124,6 +5186,19 @@ function onReverseProxyInput() {
 
 async function onConnectButtonClick(e) {
     e.stopPropagation();
+
+    if (oai_settings.chat_completion_source == chat_completion_sources.CHUTES) {
+        const api_key_chutes = String($('#api_key_chutes_chat').val()).trim();
+
+        if (api_key_chutes.length) {
+            await writeSecret(SECRET_KEYS.CHUTES, api_key_chutes);
+        }
+
+        if (!secret_state[SECRET_KEYS.CHUTES]) {
+            console.log('No secret key saved for Chutes');
+            return;
+        }
+    }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.FIREWORKS) {
         const api_key_fireworks = String($('#api_key_fireworks_chat').val()).trim();
@@ -5392,7 +5467,10 @@ async function onConnectButtonClick(e) {
 }
 
 function toggleChatCompletionForms() {
-    if (oai_settings.chat_completion_source == chat_completion_sources.FIREWORKS) {
+    if (oai_settings.chat_completion_source == chat_completion_sources.CHUTES) {
+        $('#model_chutes_select').trigger('change');
+    }
+    else if (oai_settings.chat_completion_source == chat_completion_sources.FIREWORKS) {
         $('#model_fireworks_select').trigger('change');
     }
     else if (oai_settings.chat_completion_source == chat_completion_sources.NEBIUS) {
@@ -5584,6 +5662,8 @@ export function isImageInliningSupported() {
     ];
 
     switch (oai_settings.chat_completion_source) {
+        case chat_completion_sources.CHUTES:
+            return visionSupportedModels.some(model => oai_settings.chutes_model.includes(model));
         case chat_completion_sources.FIREWORKS:
             return visionSupportedModels.some(model => oai_settings.fireworks_model.includes(model));
         case chat_completion_sources.NEBIUS:
@@ -6196,6 +6276,7 @@ export function initOpenAI() {
         oai_settings.bind_preset_to_connection = !!$(this).prop('checked');
         saveSettingsDebounced();
     });
+    $('#model_chutes_select').on('change', onModelChange);
     $('#model_fireworks_select').on('change', onModelChange);
     $('#model_nebius_select').on('change', onModelChange);
     $('#model_hyperbolic_select').on('change', onModelChange);

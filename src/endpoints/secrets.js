@@ -7,6 +7,7 @@ import { getConfigValue } from '../util.js';
 
 export const SECRETS_FILE = 'secrets.json';
 export const SECRET_KEYS = {
+    CHUTES: 'api_key_chutes',
     FIREWORKS: 'api_key_fireworks',
     GLHF: 'api_key_glhf',
     NEBIUS: 'api_key_nebius',
