@@ -169,6 +169,7 @@ let biasCache = undefined;
 export let model_list = [];
 
 export const chat_completion_sources = {
+    HYPERBOLIC: 'hyperbolic',
     SAMBANOVA: 'sambanova',
 
     OPENAI: 'openai',
@@ -253,6 +254,7 @@ export const settingsToUpdate = {
     repetition_penalty: ['#repetition_penalty_openai', 'repetition_penalty_openai', false, false],
     max_context_unlocked: ['#oai_max_context_unlocked', 'max_context_unlocked', true, false],
 
+    hyperbolic_model: ['#model_hyperbolic_select', 'hyperbolic_model', false, true],
     sambanova_model: ['#model_sambanova_select', 'sambanova_model', false, true],
 
     openai_model: ['#model_openai_select', 'openai_model', false, true],
@@ -353,6 +355,7 @@ const default_settings = {
     scenario_format: default_scenario_format,
     personality_format: default_personality_format,
 
+    hyperbolic_model: '',
     sambanova_model: '',
 
     openai_model: 'gpt-4-turbo',
@@ -439,6 +442,7 @@ const oai_settings = {
     scenario_format: default_scenario_format,
     personality_format: default_personality_format,
 
+    hyperbolic_model: default_settings.hyperbolic_model,
     sambanova_model: default_settings.sambanova_model,
 
     openai_model: 'gpt-4-turbo',
@@ -1667,6 +1671,8 @@ async function sendWindowAIRequest(messages, signal, stream) {
 export function getChatCompletionModel(source = null) {
     const activeSource = source ?? oai_settings.chat_completion_source;
     switch (activeSource) {
+        case chat_completion_sources.HYPERBOLIC:
+            return oai_settings.hyperbolic_model;
         case chat_completion_sources.SAMBANOVA:
             return oai_settings.sambanova_model;
 
@@ -2059,6 +2065,7 @@ async function sendOpenAIRequest(type, messages, signal) {
 
     let logit_bias = {};
 
+    const isHyperbolic = oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC;
     const isSambaNova = oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA;
 
     const isClaude = oai_settings.chat_completion_source == chat_completion_sources.CLAUDE;
@@ -2082,7 +2089,7 @@ async function sendOpenAIRequest(type, messages, signal) {
     const isContinue = type === 'continue';
     const stream = oai_settings.stream_openai && !isQuiet && !isScale && !(isOAI && ['o1-2024-12-17', 'o1'].includes(oai_settings.openai_model));
     const useLogprobs = !!power_user.request_token_probabilities;
-    const canMultiSwipe = oai_settings.n > 1 && !isContinue && !isImpersonate && !isQuiet && (isOAI || isCustom || isXAI);
+    const canMultiSwipe = oai_settings.n > 1 && !isContinue && !isImpersonate && !isQuiet && (isHyperbolic || isOAI || isCustom || isXAI);
 
     // If we're using the window.ai extension, use that instead
     // Doesn't support logit bias yet
@@ -2091,6 +2098,8 @@ async function sendOpenAIRequest(type, messages, signal) {
     }
 
     const logitBiasSources = [chat_completion_sources.OPENAI, chat_completion_sources.OPENROUTER, chat_completion_sources.SCALE, chat_completion_sources.CUSTOM];
+    logitBiasSources.push(chat_completion_sources.HYPERBOLIC);
+
     if (oai_settings.bias_preset_selected
         && logitBiasSources.includes(oai_settings.chat_completion_source)
         && Array.isArray(oai_settings.bias_presets[oai_settings.bias_preset_selected])
@@ -2163,6 +2172,14 @@ async function sendOpenAIRequest(type, messages, signal) {
         delete generate_data.logprobs;
     }
 
+    // https://docs.hyperbolic.xyz/docs/rest-api
+    if (isHyperbolic) {
+        generate_data['top_p'] = Number(oai_settings.top_p_openai);
+        generate_data['top_k'] = Number(oai_settings.top_k_openai) || -1;
+        generate_data['min_p'] = Number(oai_settings.min_p_openai);
+        generate_data['repetition_penalty'] = Number(oai_settings.repetition_penalty_openai);
+        generate_data['stop'] = getCustomStoppingStrings();
+    }
 
     // https://community.sambanova.ai/t/sambanova-cloud-api-reference/197
     if (isSambaNova) {
@@ -2297,7 +2314,7 @@ async function sendOpenAIRequest(type, messages, signal) {
         delete generate_data.max_tokens;
     }
 
-    if ((isOAI || isOpenRouter || isMistral || isCustom || isCohere || isNano || isXAI || isPollinations) && oai_settings.seed >= 0) {
+    if ((isHyperbolic || isOAI || isOpenRouter || isMistral || isCustom || isCohere || isNano || isXAI || isPollinations) && oai_settings.seed >= 0) {
         generate_data['seed'] = oai_settings.seed;
     }
 
@@ -3370,6 +3387,7 @@ function loadOpenAISettings(data, settings) {
     oai_settings.personality_format = settings.personality_format ?? default_settings.personality_format;
     oai_settings.group_nudge_prompt = settings.group_nudge_prompt ?? default_settings.group_nudge_prompt;
 
+    oai_settings.hyperbolic_model = settings.hyperbolic_model ?? default_settings.hyperbolic_model;
     oai_settings.sambanova_model = settings.sambanova_model ?? default_settings.sambanova_model;
 
     oai_settings.claude_model = settings.claude_model ?? default_settings.claude_model;
@@ -3453,6 +3471,7 @@ function loadOpenAISettings(data, settings) {
     $('#openai_inline_image_quality').val(oai_settings.inline_image_quality);
     $(`#openai_inline_image_quality option[value="${oai_settings.inline_image_quality}"]`).prop('selected', true);
 
+    $('#model_hyperbolic_select').val(oai_settings.hyperbolic_model);
     $('#model_sambanova_select').val(oai_settings.sambanova_model);
 
     $('#model_openai_select').val(oai_settings.openai_model);
@@ -3749,6 +3768,7 @@ async function saveOpenAIPreset(name, settings, triggerUi = true) {
     const presetBody = {
         chat_completion_source: settings.chat_completion_source,
 
+        hyperbolic_model: settings.hyperbolic_model,
         sambanova_model: settings.sambanova_model,
 
         openai_model: settings.openai_model,
@@ -4484,6 +4504,11 @@ async function onModelChange() {
     biasCache = undefined;
     let value = String($(this).val() || '');
 
+    if ($(this).is('#model_hyperbolic_select')) {
+        console.log('Hyperbolic model changed to', value);
+        oai_settings.hyperbolic_model = value;
+    }
+
     if ($(this).is('#model_sambanova_select')) {
         console.log('SambaNova model changed to', value);
         oai_settings.sambanova_model = value;
@@ -4603,6 +4628,36 @@ async function onModelChange() {
     if ($(this).is('#model_xai_select')) {
         console.log('XAI model changed to', value);
         oai_settings.xai_model = value;
+    }
+
+    if (oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC) {
+        $('#openai_max_context').attr('max', oai_settings.max_context_unlocked ? unlocked_max : {
+            'meta-llama/Llama-3.3-70B-Instruct': 131072,
+            'meta-llama/Llama-3.2-3B-Instruct': 131072,
+            'meta-llama/Meta-Llama-3.1-8B-Instruct': 32768,
+            'meta-llama/Meta-Llama-3.1-70B-Instruct': 32768,
+            'meta-llama/Meta-Llama-3.1-405B-Instruct': 8192,
+            'meta-llama/Meta-Llama-3-70B-Instruct': 8192,
+            'Qwen/Qwen2.5-72B-Instruct': 32768,
+            'Qwen/Qwen2.5-Coder-32B-Instruct': 131072,
+            'Qwen/QwQ-32B': 131072,
+            'Qwen/QwQ-32B-Preview': 32768,
+            'Qwen/Qwen2-VL-72B-Instruct': 32768,
+            'Qwen/Qwen2-VL-7B-Instruct': 32768,
+            'deepseek-ai/DeepSeek-R1': 131072,
+            'deepseek-ai/DeepSeek-V3': 131072,
+            'deepseek-ai/DeepSeek-V3-0324': 131072,
+            'NousResearch/Hermes-3-Llama-3.1-70B': 12288,
+            'mistralai/Pixtral-12B-2409': 32768,
+            'meta-llama/Meta-Llama-3.1-405B': 32768,
+            'meta-llama/Meta-Llama-3.1-405B-FP8': 32764,
+        }[oai_settings.hyperbolic_model] ?? max_8k);
+
+        oai_settings.openai_max_context = Math.min(Number($('#openai_max_context').attr('max')), oai_settings.openai_max_context);
+        $('#openai_max_context').val(oai_settings.openai_max_context).trigger('input');
+
+        oai_settings.temp_openai = Math.min(oai_max_temp, oai_settings.temp_openai);
+        $('#temp_openai').attr('max', oai_max_temp).val(oai_settings.temp_openai).trigger('input');
     }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA) {
@@ -4953,6 +5008,19 @@ function onReverseProxyInput() {
 async function onConnectButtonClick(e) {
     e.stopPropagation();
 
+    if (oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC) {
+        const api_key_hyperbolic = String($('#api_key_hyperbolic_chat').val()).trim();
+
+        if (api_key_hyperbolic.length) {
+            await writeSecret(SECRET_KEYS.HYPERBOLIC, api_key_hyperbolic);
+        }
+
+        if (!secret_state[SECRET_KEYS.HYPERBOLIC]) {
+            console.log('No secret key saved for Hyperbolic');
+            return;
+        }
+    }
+
     if (oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA) {
         const api_key_sambanova = String($('#api_key_sambanova').val()).trim();
 
@@ -5181,7 +5249,10 @@ async function onConnectButtonClick(e) {
 }
 
 function toggleChatCompletionForms() {
-    if (oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA) {
+    if (oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC) {
+        $('#model_hyperbolic_select').trigger('change');
+    }
+    else if (oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA) {
         $('#model_sambanova_select').trigger('change');
     }
     else if (oai_settings.chat_completion_source == chat_completion_sources.CLAUDE) {
@@ -5324,7 +5395,8 @@ export function isImageInliningSupported() {
 
     // gultra just isn't being offered as multimodal, thanks google.
     const visionSupportedModels = [
-        // OpenAI
+        'qwen2-vl',
+
         'chatgpt-4o-latest',
         'gpt-4-turbo',
         'gpt-4-vision',
@@ -5358,6 +5430,9 @@ export function isImageInliningSupported() {
     ];
 
     switch (oai_settings.chat_completion_source) {
+        case chat_completion_sources.HYPERBOLIC:
+            return visionSupportedModels.some(model => oai_settings.hyperbolic_model.toLowerCase().includes(model));
+
         case chat_completion_sources.OPENAI:
             return visionSupportedModels.some(model =>
                 oai_settings.openai_model.includes(model)
@@ -5963,6 +6038,8 @@ export function initOpenAI() {
         oai_settings.bind_preset_to_connection = !!$(this).prop('checked');
         saveSettingsDebounced();
     });
+    $('#model_hyperbolic_select').on('change', onModelChange);
+    $('#model_sambanova_select').on('change', onModelChange);
 
     $('#model_sambanova_select').on('change', onModelChange);
     $('#api_button_openai').on('click', onConnectButtonClick);

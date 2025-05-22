@@ -7,6 +7,7 @@ import { getConfigValue } from '../util.js';
 
 export const SECRETS_FILE = 'secrets.json';
 export const SECRET_KEYS = {
+    HYPERBOLIC: 'api_key_hyperbolic',
     SAMBANOVA: 'api_key_sambanova',
 
     HORDE: 'api_key_horde',

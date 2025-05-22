@@ -2,6 +2,14 @@ import { TEXTGEN_TYPES, OPENROUTER_HEADERS, FEATHERLESS_HEADERS } from './consta
 import { SECRET_KEYS, readSecret } from './endpoints/secrets.js';
 import { getConfigValue } from './util.js';
 
+function getHyperbolicHeaders(directories) {
+    const apiKey = readSecret(directories, SECRET_KEYS.HYPERBOLIC);
+
+    return apiKey ? ({
+        'Authorization': `Bearer ${apiKey}`,
+    }) : {};
+}
+
 /**
  * Gets the headers for the Mancer API.
  * @param {import('./users.js').UserDirectoryList} directories User directories
@@ -214,6 +222,8 @@ export function setAdditionalHeaders(request, args, server) {
  */
 export function setAdditionalHeadersByType(requestHeaders, type, server, directories) {
     const headerGetters = {
+        [TEXTGEN_TYPES.HYPERBOLIC]: getHyperbolicHeaders,
+
         [TEXTGEN_TYPES.MANCER]: getMancerHeaders,
         [TEXTGEN_TYPES.VLLM]: getVllmHeaders,
         [TEXTGEN_TYPES.APHRODITE]: getAphroditeHeaders,

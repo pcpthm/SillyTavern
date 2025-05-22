@@ -3,6 +3,7 @@ import { callPopup, getRequestHeaders } from '../script.js';
 import { t } from './i18n.js';
 
 export const SECRET_KEYS = {
+    HYPERBOLIC: 'api_key_hyperbolic',
     SAMBANOVA: 'api_key_sambanova',
 
     HORDE: 'api_key_horde',
@@ -48,6 +49,7 @@ export const SECRET_KEYS = {
 };
 
 const INPUT_MAP = {
+    [SECRET_KEYS.HYPERBOLIC]: 'input[name="api_key_hyperbolic"]',
     [SECRET_KEYS.SAMBANOVA]: '#api_key_sambanova',
 
     [SECRET_KEYS.HORDE]: '#horde_api_key',

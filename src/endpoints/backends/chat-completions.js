@@ -44,6 +44,7 @@ import {
     getWebTokenizer,
 } from '../tokenizers.js';
 
+const API_HYPERBOLIC = 'https://api.hyperbolic.xyz/v1';
 const API_SAMBANOVA = 'https://fast-api.snova.ai/v1';
 
 const API_OPENAI = 'https://api.openai.com/v1';
@@ -990,7 +991,11 @@ router.post('/status', async function (request, response_getstatus_openai) {
     let api_key_openai;
     let headers;
 
-    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.OPENAI) {
+    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.HYPERBOLIC) {
+        api_url = API_HYPERBOLIC;
+        api_key_openai = readSecret(request.user.directories, SECRET_KEYS.HYPERBOLIC);
+        headers = {};
+    } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.OPENAI) {
         api_url = new URL(request.body.reverse_proxy || API_OPENAI).toString();
         api_key_openai = request.body.reverse_proxy ? request.body.proxy_password : readSecret(request.user.directories, SECRET_KEYS.OPENAI);
         headers = {};
@@ -1222,7 +1227,17 @@ router.post('/generate', function (request, response) {
             getPromptNames(request));
     }
 
-    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.SAMBANOVA) {
+    if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.HYPERBOLIC) {
+        apiUrl = API_HYPERBOLIC;
+        apiKey = readSecret(request.user.directories, SECRET_KEYS.HYPERBOLIC);
+        headers = {};
+        bodyParams = {
+            min_p: request.body.min_p,
+            repetition_penalty: request.body.repetition_penalty,
+            logprobs: request.body.logprobs > 0,
+            top_logprobs: request.body.logprobs || undefined,
+        };
+    } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.SAMBANOVA) {
         apiUrl = API_SAMBANOVA;
         apiKey = readSecret(request.user.directories, SECRET_KEYS.SAMBANOVA);
         headers = {};

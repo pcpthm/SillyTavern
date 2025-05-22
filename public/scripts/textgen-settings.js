@@ -20,6 +20,8 @@ import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, getTextTokens, tokenizers } from
 import { getSortableDelay, onlyUnique, arraysEqual } from './utils.js';
 
 export const textgen_types = {
+    HYPERBOLIC: 'hyperbolic',
+
     OOBA: 'ooba',
     MANCER: 'mancer',
     VLLM: 'vllm',
@@ -38,6 +40,8 @@ export const textgen_types = {
 };
 
 const {
+    HYPERBOLIC,
+
     GENERIC,
     MANCER,
     VLLM,
@@ -104,6 +108,8 @@ export const APHRODITE_DEFAULT_ORDER = [
     'xtc',
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
+
+let HYPERBOLIC_SERVER = 'https://api.hyperbolic.xyz/v1';
 
 // Maybe let it be configurable in the future?
 // (7 days later) The future has come.
@@ -193,6 +199,9 @@ const settings = {
     spaces_between_special_tokens: true,
     speculative_ngram: false,
     type: textgen_types.OOBA,
+
+    hyperbolic_model: '',
+
     mancer_model: 'mytholite',
     togetherai_model: 'Gryphe/MythoMax-L2-13b',
     infermaticai_model: '',
@@ -329,6 +338,9 @@ export function validateTextGenUrl() {
 export function getTextGenServer(type = null) {
     const selectedType = type ?? settings.type;
     switch (selectedType) {
+        case HYPERBOLIC:
+            return HYPERBOLIC_SERVER;
+
         case FEATHERLESS:
             return FEATHERLESS_SERVER;
         case MANCER:
@@ -535,6 +547,8 @@ export function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#hyperbolic_model').val(settings.hyperbolic_model);
+
     if (loadedSettings.api_use_mancer_webui) {
         settings.type = MANCER;
     }
@@ -723,7 +737,7 @@ jQuery(function () {
         const type = String($(this).val());
         settings.type = type;
 
-        if ([VLLM, APHRODITE, INFERMATICAI].includes(settings.type)) {
+        if ([HYPERBOLIC, VLLM, APHRODITE, INFERMATICAI].includes(settings.type)) {
             $('#mirostat_mode_textgenerationwebui').attr('step', 2); //Aphro disallows mode 1
             $('#do_sample_textgenerationwebui').prop('checked', true); //Aphro should always do sample; 'otherwise set temp to 0 to mimic no sample'
             $('#ban_eos_token_textgenerationwebui').prop('checked', false); //Aphro should not ban EOS, just ignore it; 'add token '2' to ban list do to this'
@@ -1069,6 +1083,8 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (settings.type) {
+        case HYPERBOLIC:
+
         case KOBOLDCPP:
         case TABBY:
         case VLLM:
@@ -1178,6 +1194,9 @@ function toIntArray(string) {
 
 export function getTextGenModel() {
     switch (settings.type) {
+        case HYPERBOLIC:
+            return settings.hyperbolic_model;
+
         case OOBA:
             if (settings.custom_model) {
                 return settings.custom_model;
@@ -1430,6 +1449,10 @@ export async function getTextGenGenerationData(finalPrompt, maxTokens, isImperso
             : undefined,
     };
 
+    if (settings.type === HYPERBOLIC) {
+        params.top_k = settings.top_k || -1;
+    }
+
     if (settings.type === OPENROUTER) {
         params.provider = settings.openrouter_providers;
         params.allow_fallbacks = settings.openrouter_allow_fallbacks;
@@ -1463,6 +1486,8 @@ export async function getTextGenGenerationData(finalPrompt, maxTokens, isImperso
     }
 
     switch (settings.type) {
+        case HYPERBOLIC:
+
         case VLLM:
         case INFERMATICAI:
             params = Object.assign(params, vllmParams);
