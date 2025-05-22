@@ -161,6 +161,7 @@ export const GEMINI_SAFETY = [
 ];
 
 export const CHAT_COMPLETION_SOURCES = {
+    FIREWORKS: 'fireworks',
     NEBIUS: 'nebius',
     HYPERBOLIC: 'hyperbolic',
     SAMBANOVA: 'sambanova',
@@ -191,6 +192,7 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    FIREWORKS: 'fireworks',
     DEEPSEEK: 'deepseek',
     GLHF: 'glhf',
     NEBIUS: 'nebius',
@@ -213,6 +215,33 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+// <https://docs.fireworks.ai/api-reference/post-completions>
+export const FIREWORKS_KEYS = [
+    'model',
+    'prompt',
+    'images',
+    'max_tokens',
+    'logprobs',
+    'echo',
+    'temperature',
+    'top_p',
+    'top_k',
+    'frequency_penalty',
+    'presence_penalty',
+    'repetition_penalty',
+    'mirostat_lr',
+    'mirostat_target',
+    'n',
+    'ignore_eos',
+    'stop',
+    'response_format',
+    'stream',
+    'context_length_exceeded_behavior',
+    'user',
+    'raw_output',    // <https://docs.fireworks.ai/guides/querying-text-models#raw-output>
+    'min_p',    // Undocumented but seems to work
+];
 
 // <https://api-docs.deepseek.com/api/create-completion>
 export const DEEPSEEK_KEYS = [

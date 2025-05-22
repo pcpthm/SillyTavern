@@ -2,6 +2,14 @@ import { TEXTGEN_TYPES, OPENROUTER_HEADERS, FEATHERLESS_HEADERS } from './consta
 import { SECRET_KEYS, readSecret } from './endpoints/secrets.js';
 import { getConfigValue } from './util.js';
 
+function getFireworksHeaders(directories) {
+    const apiKey = readSecret(directories, SECRET_KEYS.FIREWORKS);
+
+    return apiKey ? ({
+        'Authorization': `Bearer ${apiKey}`,
+    }) : {};
+}
+
 function getDeepSeekHeaders(directories) {
     const apiKey = readSecret(directories, SECRET_KEYS.DEEPSEEK);
 
@@ -254,6 +262,7 @@ export function setAdditionalHeaders(request, args, server) {
  */
 export function setAdditionalHeadersByType(requestHeaders, type, server, directories) {
     const headerGetters = {
+        [TEXTGEN_TYPES.FIREWORKS]: getFireworksHeaders,
         [TEXTGEN_TYPES.DEEPSEEK]: getDeepSeekHeaders,
         [TEXTGEN_TYPES.GLHF]: getGLHFHeaders,
         [TEXTGEN_TYPES.NEBIUS]: getNebiusHeaders,

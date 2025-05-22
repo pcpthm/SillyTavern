@@ -80,6 +80,22 @@ const OPENROUTER_PROVIDERS = [
     'xAI',
 ];
 
+export async function loadFireworksModels(data) {
+    if (!Array.isArray(data)) {
+        console.error('Invalid Fireworks models data', data);
+        return;
+    }
+
+    $('#fireworks_model').empty();
+    for (const model of data) {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.text = model.id;
+        option.selected = model.id === textgen_settings.fireworks_model;
+        $('#fireworks_model').append(option);
+    }
+}
+
 export async function loadGLHFModels(data) {
     if (!Array.isArray(data)) {
         console.error('Invalid GLHF models data', data);
@@ -640,6 +656,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function onFireworksModelSelect() {
+    const modelId = String($('#fireworks_model').val());
+    textgen_settings.fireworks_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onDeepSeekModelSelect() {
     const modelId = String($('#deepseek_model').val());
     textgen_settings.deepseek_model = modelId;
@@ -1031,6 +1053,7 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#fireworks_model').on('change', onFireworksModelSelect);
     $('#deepseek_model').on('change', onDeepSeekModelSelect);
     $('#glhf_model').on('change', onGLHFModelChange);
     $('#glhf_model_select').on('change', onGLHFModelSelect);

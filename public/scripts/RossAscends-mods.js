@@ -381,7 +381,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'textgenerationwebui':
-                if ((textgen_settings.type === textgen_types.DEEPSEEK && secret_state[SECRET_KEYS.DEEPSEEK])
+                if ((textgen_settings.type === textgen_types.FIREWORKS && secret_state[SECRET_KEYS.FIREWORKS])
+                    || (textgen_settings.type === textgen_types.DEEPSEEK && secret_state[SECRET_KEYS.DEEPSEEK])
                     || (textgen_settings.type === textgen_types.GLHF && secret_state[SECRET_KEYS.GLHF])
                     || (textgen_settings.type === textgen_types.NEBIUS && secret_state[SECRET_KEYS.NEBIUS])
                     || (textgen_settings.type === textgen_types.XAI && secret_state[SECRET_KEYS.XAI])
@@ -401,7 +402,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'openai':
-                if ((secret_state[SECRET_KEYS.NEBIUS] && oai_settings.chat_completion_source == chat_completion_sources.NEBIUS)
+                if ((secret_state[SECRET_KEYS.FIREWORKS] && oai_settings.chat_completion_source == chat_completion_sources.FIREWORKS)
+                    || (secret_state[SECRET_KEYS.NEBIUS] && oai_settings.chat_completion_source == chat_completion_sources.NEBIUS)
                     || (secret_state[SECRET_KEYS.HYPERBOLIC] && oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC)
                     || (secret_state[SECRET_KEYS.SAMBANOVA] && oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA)
 
