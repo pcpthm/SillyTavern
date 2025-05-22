@@ -2208,6 +2208,12 @@ async function sendOpenAIRequest(type, messages, signal) {
         'include_reasoning': Boolean(oai_settings.show_thoughts),
         'reasoning_effort': getReasoningEffort(),
         'enable_web_search': Boolean(oai_settings.enable_web_search),
+        'xai_safe_search_web': oai_settings.xai_safe_search_web || 'false',
+        'xai_safe_search_x': oai_settings.xai_safe_search_x || 'false',
+        'xai_search_from_date': oai_settings.xai_search_from_date || '',
+        'xai_search_to_date': oai_settings.xai_search_to_date || '',
+        'xai_search_country': oai_settings.xai_search_country || '',
+        'xai_excluded_websites': oai_settings.xai_excluded_websites || '',
         'request_images': Boolean(oai_settings.request_images),
         'custom_prompt_post_processing': oai_settings.custom_prompt_post_processing,
     };
@@ -3523,6 +3529,12 @@ function loadOpenAISettings(data, settings) {
     oai_settings.show_thoughts = settings.show_thoughts ?? default_settings.show_thoughts;
     oai_settings.reasoning_effort = settings.reasoning_effort ?? default_settings.reasoning_effort;
     oai_settings.enable_web_search = settings.enable_web_search ?? default_settings.enable_web_search;
+    oai_settings.xai_safe_search_web = settings.xai_safe_search_web ?? 'false';
+    oai_settings.xai_safe_search_x = settings.xai_safe_search_x ?? 'false';
+    oai_settings.xai_search_from_date = settings.xai_search_from_date ?? '';
+    oai_settings.xai_search_to_date = settings.xai_search_to_date ?? '';
+    oai_settings.xai_search_country = settings.xai_search_country ?? '';
+    oai_settings.xai_excluded_websites = settings.xai_excluded_websites ?? '';
     oai_settings.request_images = settings.request_images ?? default_settings.request_images;
     oai_settings.seed = settings.seed ?? default_settings.seed;
     oai_settings.n = settings.n ?? default_settings.n;
@@ -3664,6 +3676,24 @@ function loadOpenAISettings(data, settings) {
     $('#openai_enable_web_search').prop('checked', oai_settings.enable_web_search);
     $('#openai_request_images').prop('checked', oai_settings.request_images);
     $('#bind_preset_to_connection').prop('checked', oai_settings.bind_preset_to_connection);
+    
+    // Initialize xAI web search options
+    $('#xai_safe_search_web').val(oai_settings.xai_safe_search_web || 'false');
+    $('#xai_safe_search_x').val(oai_settings.xai_safe_search_x || 'false');
+    
+    // Initialize advanced xAI search options
+    if (oai_settings.xai_search_from_date) {
+        $('#xai_search_from_date').val(oai_settings.xai_search_from_date);
+    }
+    if (oai_settings.xai_search_to_date) {
+        $('#xai_search_to_date').val(oai_settings.xai_search_to_date);
+    }
+    $('#xai_search_country').val(oai_settings.xai_search_country || '');
+    $('#xai_excluded_websites').val(oai_settings.xai_excluded_websites || '');
+    
+    // Show/hide xAI web search options based on current settings
+    const isXaiSelected = $('#api_button_openai').val() === 'xai';
+    $('#xai_web_search_options').toggle(oai_settings.enable_web_search && isXaiSelected);
 
     $('#openai_reasoning_effort').val(oai_settings.reasoning_effort);
     $(`#openai_reasoning_effort option[value="${oai_settings.reasoning_effort}"]`).prop('selected', true);
@@ -3947,6 +3977,8 @@ async function saveOpenAIPreset(name, settings, triggerUi = true) {
         show_thoughts: settings.show_thoughts,
         reasoning_effort: settings.reasoning_effort,
         enable_web_search: settings.enable_web_search,
+        xai_safe_search_web: settings.xai_safe_search_web,
+        xai_safe_search_x: settings.xai_safe_search_x,
         request_images: settings.request_images,
         seed: settings.seed,
         n: settings.n,
@@ -6235,6 +6267,43 @@ export function initOpenAI() {
     $('#openai_enable_web_search').on('input', function () {
         oai_settings.enable_web_search = !!$(this).prop('checked');
         calculateOpenRouterCost();
+        saveSettingsDebounced();
+        
+        // Toggle visibility of xAI web search options
+        const isXaiSelected = $('#api_button_openai').val() === 'xai';
+        const isChecked = $(this).prop('checked');
+        $('#xai_web_search_options').toggle(isChecked && isXaiSelected);
+        $('#xai_web_search_options_advanced').toggle(isChecked && isXaiSelected);
+        $('#xai_web_search_options_filters').toggle(isChecked && isXaiSelected);
+    });
+    
+    $('#xai_safe_search_web').on('change', function() {
+        oai_settings.xai_safe_search_web = $(this).val();
+        saveSettingsDebounced();
+    });
+    
+    $('#xai_safe_search_x').on('change', function() {
+        oai_settings.xai_safe_search_x = $(this).val();
+        saveSettingsDebounced();
+    });
+    
+    $('#xai_search_from_date').on('change', function() {
+        oai_settings.xai_search_from_date = $(this).val();
+        saveSettingsDebounced();
+    });
+    
+    $('#xai_search_to_date').on('change', function() {
+        oai_settings.xai_search_to_date = $(this).val();
+        saveSettingsDebounced();
+    });
+    
+    $('#xai_search_country').on('change', function() {
+        oai_settings.xai_search_country = $(this).val();
+        saveSettingsDebounced();
+    });
+    
+    $('#xai_excluded_websites').on('input', function() {
+        oai_settings.xai_excluded_websites = $(this).val();
         saveSettingsDebounced();
     });
 

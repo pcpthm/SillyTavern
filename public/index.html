@@ -45,6 +45,54 @@
     <link rel="stylesheet" type="text/css" href="css/user.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <!-- Scripts are loaded at the end of the body to improve page load speed -->
+    <script>
+        // This script will be executed when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to toggle xAI web search options visibility
+            function toggleXaiWebSearchOptions() {
+                const webSearchCheckbox = document.getElementById('openai_enable_web_search');
+                const xaiWebSearchOptions = document.getElementById('xai_web_search_options');
+                const xaiWebSearchOptionsAdvanced = document.getElementById('xai_web_search_options_advanced');
+                const xaiWebSearchOptionsFilters = document.getElementById('xai_web_search_options_filters');
+                const apiTypeSelect = document.getElementById('api_button_openai');
+                
+                if (webSearchCheckbox && xaiWebSearchOptions && apiTypeSelect) {
+                    // Check if web search is enabled and API type is xAI
+                    const isWebSearchEnabled = webSearchCheckbox.checked;
+                    const isXaiSelected = apiTypeSelect.value === 'xai';
+                    
+                    // Show options only if both conditions are met
+                    const showOptions = (isWebSearchEnabled && isXaiSelected) ? 'flex' : 'none';
+                    xaiWebSearchOptions.style.display = showOptions;
+                    
+                    // Also toggle advanced options
+                    if (xaiWebSearchOptionsAdvanced) {
+                        xaiWebSearchOptionsAdvanced.style.display = showOptions;
+                    }
+                    
+                    // Also toggle filter options
+                    if (xaiWebSearchOptionsFilters) {
+                        xaiWebSearchOptionsFilters.style.display = showOptions;
+                    }
+                }
+            }
+            
+            // Add event listeners
+            const webSearchCheckbox = document.getElementById('openai_enable_web_search');
+            const apiTypeSelect = document.getElementById('api_button_openai');
+            
+            if (webSearchCheckbox) {
+                webSearchCheckbox.addEventListener('change', toggleXaiWebSearchOptions);
+            }
+            
+            if (apiTypeSelect) {
+                apiTypeSelect.addEventListener('change', toggleXaiWebSearchOptions);
+            }
+            
+            // Initial toggle on page load
+            setTimeout(toggleXaiWebSearchOptions, 500); // Slight delay to ensure all elements are loaded
+        });
+    </script>
 </head>
 
 <body class="no-blur">
@@ -1981,6 +2029,101 @@
                                             <b data-source="openrouter" data-i18n="openrouter_web_search_fee">
                                                 Not free, adds a $0.02 fee to each prompt.
                                             </b>
+                                        </div>
+                                        <div class="flex-container flexNoGap" data-source="xai" id="xai_web_search_options" style="display: none; margin-top: 10px;">
+                                            <!-- First row: Safe Search options -->
+                                            <div class="flex1 flex-container flexNoGap flexColumn">
+                                                <label for="xai_safe_search_web" class="checkbox_label">
+                                                    <span data-i18n="Web Safe Search">Web Safe Search</span>
+                                                </label>
+                                                <select id="xai_safe_search_web" class="text_pole">
+                                                    <option value="false" data-i18n="Off">Off</option>
+                                                    <option value="true" data-i18n="On">On</option>
+                                                </select>
+                                                <div class="flexBasis100p toggle-description justifyLeft">
+                                                    <span data-i18n="Filter explicit content from web search results.">
+                                                        Filter explicit content from web search results.
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="flex1 flex-container flexNoGap flexColumn marginLeft10">
+                                                <label for="xai_safe_search_x" class="checkbox_label">
+                                                    <span data-i18n="X Safe Search">X Safe Search</span>
+                                                </label>
+                                                <select id="xai_safe_search_x" class="text_pole">
+                                                    <option value="false" data-i18n="Off">Off</option>
+                                                    <option value="true" data-i18n="On">On</option>
+                                                </select>
+                                                <div class="flexBasis100p toggle-description justifyLeft">
+                                                    <span data-i18n="Filter explicit content from X (Twitter) search results.">
+                                                        Filter explicit content from X (Twitter) search results.
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Date Range and Country options -->
+                                        <div class="flex-container flexNoGap" data-source="xai" id="xai_web_search_options_advanced" style="display: none; margin-top: 10px;">
+                                            <div class="flex1 flex-container flexNoGap flexColumn">
+                                                <label for="xai_search_from_date" class="checkbox_label">
+                                                    <span data-i18n="From Date">From Date</span>
+                                                </label>
+                                                <input id="xai_search_from_date" type="date" class="text_pole">
+                                                <div class="flexBasis100p toggle-description justifyLeft">
+                                                    <span data-i18n="Start date for search results (YYYY-MM-DD).">
+                                                        Start date for search results (YYYY-MM-DD).
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="flex1 flex-container flexNoGap flexColumn marginLeft10">
+                                                <label for="xai_search_to_date" class="checkbox_label">
+                                                    <span data-i18n="To Date">To Date</span>
+                                                </label>
+                                                <input id="xai_search_to_date" type="date" class="text_pole">
+                                                <div class="flexBasis100p toggle-description justifyLeft">
+                                                    <span data-i18n="End date for search results (YYYY-MM-DD).">
+                                                        End date for search results (YYYY-MM-DD).
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Country and Excluded Websites -->
+                                        <div class="flex-container flexNoGap" data-source="xai" id="xai_web_search_options_filters" style="display: none; margin-top: 10px;">
+                                            <div class="flex1 flex-container flexNoGap flexColumn">
+                                                <label for="xai_search_country" class="checkbox_label">
+                                                    <span data-i18n="Country Filter">Country Filter</span>
+                                                </label>
+                                                <select id="xai_search_country" class="text_pole">
+                                                    <option value="" data-i18n="None">None</option>
+                                                    <option value="US">United States (US)</option>
+                                                    <option value="GB">United Kingdom (GB)</option>
+                                                    <option value="CA">Canada (CA)</option>
+                                                    <option value="AU">Australia (AU)</option>
+                                                    <option value="DE">Germany (DE)</option>
+                                                    <option value="FR">France (FR)</option>
+                                                    <option value="JP">Japan (JP)</option>
+                                                    <option value="IN">India (IN)</option>
+                                                    <option value="BR">Brazil (BR)</option>
+                                                    <option value="CH">Switzerland (CH)</option>
+                                                </select>
+                                                <div class="flexBasis100p toggle-description justifyLeft">
+                                                    <span data-i18n="Limit search results to a specific country.">
+                                                        Limit search results to a specific country.
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="flex1 flex-container flexNoGap flexColumn marginLeft10">
+                                                <label for="xai_excluded_websites" class="checkbox_label">
+                                                    <span data-i18n="Excluded Websites">Excluded Websites</span>
+                                                </label>
+                                                <input id="xai_excluded_websites" type="text" class="text_pole" placeholder="example.com,site.org">
+                                                <div class="flexBasis100p toggle-description justifyLeft">
+                                                    <span data-i18n="Comma-separated list of websites to exclude (max 5).">
+                                                        Comma-separated list of websites to exclude (max 5).
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="range-block" data-source="chutes,fireworks,nebius,openai,cohere,mistralai,custom,claude,openrouter,groq,deepseek,makersuite,ai21,xai,pollinations">

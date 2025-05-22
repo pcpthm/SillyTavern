@@ -924,9 +924,21 @@ async function sendXaiRequest(request, response) {
         bodyParams['search_parameters'] = request.body.enable_web_search ? {
             "mode": "on",
             "sources": [
-                { "type": "web", "safe_search": false },
-                { "type": "x", "safe_search": false },
+                { 
+                    "type": "web", 
+                    "safe_search": request.body.xai_safe_search_web === 'true',
+                    ...(request.body.xai_search_country && { "country": request.body.xai_search_country }),
+                    ...(request.body.xai_excluded_websites && { 
+                        "excluded_websites": request.body.xai_excluded_websites.split(',').map(site => site.trim()).filter(site => site.length > 0).slice(0, 5) 
+                    }),
+                },
+                { 
+                    "type": "x", 
+                    "safe_search": request.body.xai_safe_search_x === 'true' 
+                },
             ],
+            ...(request.body.xai_search_from_date && { "from_date": request.body.xai_search_from_date }),
+            ...(request.body.xai_search_to_date && { "to_date": request.body.xai_search_to_date }),
         } : {
             "mode": "off",
         };
