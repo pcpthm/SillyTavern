@@ -4109,6 +4109,7 @@ function setBackgroundCallback(_, bg) {
 function getModelOptions(quiet) {
     const nullResult = { control: null, options: null };
     const modelSelectMap = [
+        { id: 'nebius_model', api: 'textgenerationwebui', type: textgen_types.NEBIUS },
         { id: 'xai_model', api: 'textgenerationwebui', type: textgen_types.XAI },
         { id: 'hyperbolic_model', api: 'textgenerationwebui', type: textgen_types.HYPERBOLIC },
 
@@ -4125,6 +4126,7 @@ function getModelOptions(quiet) {
         { id: 'tabby_model', api: 'textgenerationwebui', type: textgen_types.TABBY },
         { id: 'featherless_model', api: 'textgenerationwebui', type: textgen_types.FEATHERLESS },
 
+        { id: 'model_nebius_select', api: 'openai', type: chat_completion_sources.NEBIUS },
         { id: 'model_hyperbolic_select', api: 'openai', type: chat_completion_sources.HYPERBOLIC },
         { id: 'model_sambanova_select', api: 'openai', type: chat_completion_sources.SAMBANOVA },
 

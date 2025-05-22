@@ -169,6 +169,7 @@ let biasCache = undefined;
 export let model_list = [];
 
 export const chat_completion_sources = {
+    NEBIUS: 'nebius',
     HYPERBOLIC: 'hyperbolic',
     SAMBANOVA: 'sambanova',
 
@@ -256,6 +257,7 @@ export const settingsToUpdate = {
 
     hyperbolic_model: ['#model_hyperbolic_select', 'hyperbolic_model', false, true],
     sambanova_model: ['#model_sambanova_select', 'sambanova_model', false, true],
+    nebius_model: ['#model_nebius_select', 'nebius_model', false, true],
 
     openai_model: ['#model_openai_select', 'openai_model', false, true],
     claude_model: ['#model_claude_select', 'claude_model', false, true],
@@ -355,6 +357,7 @@ const default_settings = {
     scenario_format: default_scenario_format,
     personality_format: default_personality_format,
 
+    nebius_model: '',
     hyperbolic_model: '',
     sambanova_model: '',
 
@@ -442,6 +445,7 @@ const oai_settings = {
     scenario_format: default_scenario_format,
     personality_format: default_personality_format,
 
+    nebius_model: default_settings.nebius_model,
     hyperbolic_model: default_settings.hyperbolic_model,
     sambanova_model: default_settings.sambanova_model,
 
@@ -1671,6 +1675,8 @@ async function sendWindowAIRequest(messages, signal, stream) {
 export function getChatCompletionModel(source = null) {
     const activeSource = source ?? oai_settings.chat_completion_source;
     switch (activeSource) {
+        case chat_completion_sources.NEBIUS:
+            return oai_settings.nebius_model;
         case chat_completion_sources.HYPERBOLIC:
             return oai_settings.hyperbolic_model;
         case chat_completion_sources.SAMBANOVA:
@@ -1765,6 +1771,23 @@ function calculateOpenRouterCost() {
 function saveModelList(data) {
     model_list = data.map((model) => ({ ...model }));
     model_list.sort((a, b) => a?.id && b?.id && a.id.localeCompare(b.id));
+
+    if (oai_settings.chat_completion_source == chat_completion_sources.NEBIUS) {
+        $('#model_nebius_select').empty();
+        model_list.forEach((model) => {
+            $('#model_nebius_select').append(
+                $('<option>', {
+                    value: model.id,
+                    text: model.id,
+                }));
+        });
+        const selectedModel = model_list.find(model => model.id === oai_settings.nebius_model);
+        if (model_list.length > 0 && (!selectedModel || !oai_settings.nebius_model)) {
+            oai_settings.nebius_model = model_list[0].id;
+        }
+
+        $('#model_nebius_select').val(oai_settings.nebius_model).trigger('change');
+    }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.OPENROUTER) {
         model_list = openRouterSortBy(model_list, oai_settings.openrouter_sort_models);
@@ -2065,6 +2088,7 @@ async function sendOpenAIRequest(type, messages, signal) {
 
     let logit_bias = {};
 
+    const isNebius = oai_settings.chat_completion_source == chat_completion_sources.NEBIUS;
     const isHyperbolic = oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC;
     const isSambaNova = oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA;
 
@@ -2089,7 +2113,7 @@ async function sendOpenAIRequest(type, messages, signal) {
     const isContinue = type === 'continue';
     const stream = oai_settings.stream_openai && !isQuiet && !isScale && !(isOAI && ['o1-2024-12-17', 'o1'].includes(oai_settings.openai_model));
     const useLogprobs = !!power_user.request_token_probabilities;
-    const canMultiSwipe = oai_settings.n > 1 && !isContinue && !isImpersonate && !isQuiet && (isHyperbolic || isOAI || isCustom || isXAI);
+    const canMultiSwipe = oai_settings.n > 1 && !isContinue && !isImpersonate && !isQuiet && (isNebius || isHyperbolic || isOAI || isCustom || isXAI);
 
     // If we're using the window.ai extension, use that instead
     // Doesn't support logit bias yet
@@ -2098,7 +2122,7 @@ async function sendOpenAIRequest(type, messages, signal) {
     }
 
     const logitBiasSources = [chat_completion_sources.OPENAI, chat_completion_sources.OPENROUTER, chat_completion_sources.SCALE, chat_completion_sources.CUSTOM];
-    logitBiasSources.push(chat_completion_sources.HYPERBOLIC);
+    logitBiasSources.push(chat_completion_sources.HYPERBOLIC, chat_completion_sources.NEBIUS);
 
     if (oai_settings.bias_preset_selected
         && logitBiasSources.includes(oai_settings.chat_completion_source)
@@ -2170,6 +2194,11 @@ async function sendOpenAIRequest(type, messages, signal) {
     }
     if (isOAI && oai_settings.openai_model.includes('gpt-4.5') || isOpenRouter && oai_settings.openrouter_model.includes('gpt-4.5')) {
         delete generate_data.logprobs;
+    }
+
+    if (isNebius) {
+        generate_data['top_p'] = Number(oai_settings.top_p_openai);
+        generate_data['stop'] = getCustomStoppingStrings();
     }
 
     // https://docs.hyperbolic.xyz/docs/rest-api
@@ -2314,7 +2343,7 @@ async function sendOpenAIRequest(type, messages, signal) {
         delete generate_data.max_tokens;
     }
 
-    if ((isHyperbolic || isOAI || isOpenRouter || isMistral || isCustom || isCohere || isNano || isXAI || isPollinations) && oai_settings.seed >= 0) {
+    if ((isNebius || isHyperbolic || isOAI || isOpenRouter || isMistral || isCustom || isCohere || isNano || isXAI || isPollinations) && oai_settings.seed >= 0) {
         generate_data['seed'] = oai_settings.seed;
     }
 
@@ -3387,6 +3416,7 @@ function loadOpenAISettings(data, settings) {
     oai_settings.personality_format = settings.personality_format ?? default_settings.personality_format;
     oai_settings.group_nudge_prompt = settings.group_nudge_prompt ?? default_settings.group_nudge_prompt;
 
+    oai_settings.nebius_model = settings.nebius_model ?? default_settings.nebius_model;
     oai_settings.hyperbolic_model = settings.hyperbolic_model ?? default_settings.hyperbolic_model;
     oai_settings.sambanova_model = settings.sambanova_model ?? default_settings.sambanova_model;
 
@@ -3471,6 +3501,7 @@ function loadOpenAISettings(data, settings) {
     $('#openai_inline_image_quality').val(oai_settings.inline_image_quality);
     $(`#openai_inline_image_quality option[value="${oai_settings.inline_image_quality}"]`).prop('selected', true);
 
+    $('#model_nebius_select').val(oai_settings.nebius_model);
     $('#model_hyperbolic_select').val(oai_settings.hyperbolic_model);
     $('#model_sambanova_select').val(oai_settings.sambanova_model);
 
@@ -3768,6 +3799,7 @@ async function saveOpenAIPreset(name, settings, triggerUi = true) {
     const presetBody = {
         chat_completion_source: settings.chat_completion_source,
 
+        nebius_model: settings.nebius_model,
         xai_model: settings.xai_model,
         hyperbolic_model: settings.hyperbolic_model,
         sambanova_model: settings.sambanova_model,
@@ -4505,6 +4537,16 @@ async function onModelChange() {
     biasCache = undefined;
     let value = String($(this).val() || '');
 
+    if ($(this).is('#model_nebius_select')) {
+        if (!value) {
+            console.debug('Null Nebius model selected. Ignoring.');
+            return;
+        }
+
+        console.log('Nebius model changed to', value);
+        oai_settings.nebius_model = value;
+    }
+
     if ($(this).is('#model_hyperbolic_select')) {
         console.log('Hyperbolic model changed to', value);
         oai_settings.hyperbolic_model = value;
@@ -4629,6 +4671,20 @@ async function onModelChange() {
     if ($(this).is('#model_xai_select')) {
         console.log('XAI model changed to', value);
         oai_settings.xai_model = value;
+    }
+
+    if (oai_settings.chat_completion_source == chat_completion_sources.NEBIUS) {
+        if (oai_settings.max_context_unlocked) {
+            $('#openai_max_context').attr('max', unlocked_max);
+        }
+        else {
+            $('#openai_max_context').attr('max', 164000);
+        }
+        oai_settings.openai_max_context = Math.min(Number($('#openai_max_context').attr('max')), oai_settings.openai_max_context);
+        $('#openai_max_context').val(oai_settings.openai_max_context).trigger('input');
+
+        oai_settings.temp_openai = Math.min(oai_max_temp, oai_settings.temp_openai);
+        $('#temp_openai').attr('max', oai_max_temp).val(oai_settings.temp_openai).trigger('input');
     }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC) {
@@ -5009,6 +5065,19 @@ function onReverseProxyInput() {
 async function onConnectButtonClick(e) {
     e.stopPropagation();
 
+    if (oai_settings.chat_completion_source == chat_completion_sources.NEBIUS) {
+        const api_key_nebius = String($('#api_key_nebius_chat').val()).trim();
+
+        if (api_key_nebius.length) {
+            await writeSecret(SECRET_KEYS.NEBIUS, api_key_nebius);
+        }
+
+        if (!secret_state[SECRET_KEYS.NEBIUS]) {
+            console.log('No secret key saved for Nebius');
+            return;
+        }
+    }
+
     if (oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC) {
         const api_key_hyperbolic = String($('#api_key_hyperbolic_chat').val()).trim();
 
@@ -5250,7 +5319,10 @@ async function onConnectButtonClick(e) {
 }
 
 function toggleChatCompletionForms() {
-    if (oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC) {
+    if (oai_settings.chat_completion_source == chat_completion_sources.NEBIUS) {
+        $('#model_nebius_select').trigger('change');
+    }
+    else if (oai_settings.chat_completion_source == chat_completion_sources.HYPERBOLIC) {
         $('#model_hyperbolic_select').trigger('change');
     }
     else if (oai_settings.chat_completion_source == chat_completion_sources.SAMBANOVA) {
@@ -5434,6 +5506,8 @@ export function isImageInliningSupported() {
     ];
 
     switch (oai_settings.chat_completion_source) {
+        case chat_completion_sources.NEBIUS:
+            return visionSupportedModels.some(model => oai_settings.nebius_model.toLowerCase().includes(model));
         case chat_completion_sources.HYPERBOLIC:
             return visionSupportedModels.some(model => oai_settings.hyperbolic_model.toLowerCase().includes(model));
 
@@ -6042,6 +6116,7 @@ export function initOpenAI() {
         oai_settings.bind_preset_to_connection = !!$(this).prop('checked');
         saveSettingsDebounced();
     });
+    $('#model_nebius_select').on('change', onModelChange);
     $('#model_hyperbolic_select').on('change', onModelChange);
     $('#model_sambanova_select').on('change', onModelChange);
 

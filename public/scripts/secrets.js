@@ -3,6 +3,7 @@ import { callPopup, getRequestHeaders } from '../script.js';
 import { t } from './i18n.js';
 
 export const SECRET_KEYS = {
+    NEBIUS: 'api_key_nebius',
     HYPERBOLIC: 'api_key_hyperbolic',
     SAMBANOVA: 'api_key_sambanova',
 
@@ -49,6 +50,7 @@ export const SECRET_KEYS = {
 };
 
 const INPUT_MAP = {
+    [SECRET_KEYS.NEBIUS]: 'input[name="api_key_nebius"]',
     [SECRET_KEYS.HYPERBOLIC]: 'input[name="api_key_hyperbolic"]',
     [SECRET_KEYS.SAMBANOVA]: '#api_key_sambanova',
 

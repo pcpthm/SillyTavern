@@ -7,6 +7,7 @@ import { getConfigValue } from '../util.js';
 
 export const SECRETS_FILE = 'secrets.json';
 export const SECRET_KEYS = {
+    NEBIUS: 'api_key_nebius',
     HYPERBOLIC: 'api_key_hyperbolic',
     SAMBANOVA: 'api_key_sambanova',
 

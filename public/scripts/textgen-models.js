@@ -80,6 +80,22 @@ const OPENROUTER_PROVIDERS = [
     'xAI',
 ];
 
+export async function loadNebiusModels(data) {
+    if (!Array.isArray(data)) {
+        console.error('Invalid Nebius models data', data);
+        return;
+    }
+
+    $('#nebius_model').empty();
+    for (const model of data) {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.text = model.id;
+        option.selected = model.id === textgen_settings.nebius_model;
+        $('#nebius_model').append(option);
+    }
+}
+
 export async function loadXAIModels(data) {
     if (!Array.isArray(data)) {
         console.error('Invalid xAI models data', data);
@@ -598,6 +614,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function onNebiusModelSelect() {
+    const modelId = String($('#nebius_model').val());
+    textgen_settings.nebius_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onXAIModelSelect() {
     const modelId = String($('#xai_model').val());
     textgen_settings.xai_model = modelId;
@@ -964,6 +986,7 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#nebius_model').on('change', onNebiusModelSelect);
     $('#xai_model').on('change', onXAIModelSelect);
     $('#hyperbolic_model').on('change', onHyperbolicModelSelect);
 
