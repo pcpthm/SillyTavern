@@ -1250,7 +1250,9 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgen_settings.type == textgen_types.GLHF) {
+        if (textgen_settings.type == textgen_types.DEEPSEEK) {
+            setOnlineStatus(textgen_settings.deepseek_model || data?.result);
+        } else if (textgen_settings.type == textgen_types.GLHF) {
             loadGLHFModels(data?.data);
             setOnlineStatus(textgen_settings.glhf_model || data?.result);
         } else if (textgen_settings.type == textgen_types.NEBIUS) {
@@ -9567,6 +9569,16 @@ export function swipe_right(_event, { source, repeated } = {}) {
  * @type {Record<string, ConnectAPIMap>}
  */
 export const CONNECT_API_MAP = {
+    'deepseek': {
+        selected: 'openai',
+        button: '#api_button_openai',
+        source: chat_completion_sources.DEEPSEEK,
+    },
+    'deepseek-text': {
+        selected: 'textgenerationwebui',
+        button: '#api_button_textgenerationwebui',
+        source: textgen_types.DEEPSEEK,
+    },
     'glhf-text': {
         selected: 'textgenerationwebui',
         button: '#api_button_textgenerationwebui',
@@ -11109,6 +11121,7 @@ jQuery(async function () {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_deepseek_tg', secret: SECRET_KEYS.DEEPSEEK },
             { id: 'api_key_glhf_tg', secret: SECRET_KEYS.GLHF },
             { id: 'api_key_nebius_tg', secret: SECRET_KEYS.NEBIUS },
             { id: 'api_key_xai_tg', secret: SECRET_KEYS.XAI },

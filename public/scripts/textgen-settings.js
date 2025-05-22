@@ -20,6 +20,7 @@ import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, getTextTokens, tokenizers } from
 import { getSortableDelay, onlyUnique, arraysEqual } from './utils.js';
 
 export const textgen_types = {
+    DEEPSEEK: "deepseek",
     GLHF: 'glhf',
     NEBIUS: 'nebius',
     XAI: 'xai',
@@ -43,6 +44,7 @@ export const textgen_types = {
 };
 
 const {
+    DEEPSEEK,
     GLHF,
     NEBIUS,
     XAI,
@@ -115,6 +117,7 @@ export const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let DEEPSEEK_SERVER = "https://api.deepseek.com/beta";
 let GLHF_SERVER = 'https://glhf.chat/api/openai/v1';
 let NEBIUS_SERVER = 'https://api.studio.nebius.ai/v1';
 let XAI_SERVER = 'https://api.x.ai/v1';
@@ -209,6 +212,7 @@ const settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    deepseek_model: '',
     glhf_model: '',
     nebius_model: '',
     xai_model: '',
@@ -350,6 +354,8 @@ export function validateTextGenUrl() {
 export function getTextGenServer(type = null) {
     const selectedType = type ?? settings.type;
     switch (selectedType) {
+        case DEEPSEEK:
+            return DEEPSEEK_SERVER;
         case GLHF:
             return GLHF_SERVER;
         case NEBIUS:
@@ -565,6 +571,7 @@ export function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#deepseek_model').val(settings.deepseek_model);
     $('#glhf_model').val(settings.glhf_model);
     $('#nebius_model').val(settings.nebius_model);
     $('#xai_model').val(settings.xai_model);
@@ -1104,6 +1111,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (settings.type) {
+        case DEEPSEEK:
         case GLHF:
         case NEBIUS:
         case XAI:
@@ -1218,6 +1226,8 @@ function toIntArray(string) {
 
 export function getTextGenModel() {
     switch (settings.type) {
+        case DEEPSEEK:
+            return settings.deepseek_model;
         case GLHF:
             return settings.glhf_model;
         case NEBIUS:

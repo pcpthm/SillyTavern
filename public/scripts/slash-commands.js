@@ -4109,6 +4109,7 @@ function setBackgroundCallback(_, bg) {
 function getModelOptions(quiet) {
     const nullResult = { control: null, options: null };
     const modelSelectMap = [
+        { id: 'deepseek_model', api: 'textgenerationwebui', type: textgen_types.DEEPSEEK },
         { id: 'glhf_model', api: 'textgenerationwebui', type: textgen_types.GLHF },
         { id: 'nebius_model', api: 'textgenerationwebui', type: textgen_types.NEBIUS },
         { id: 'xai_model', api: 'textgenerationwebui', type: textgen_types.XAI },
