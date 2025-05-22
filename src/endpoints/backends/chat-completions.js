@@ -367,7 +367,7 @@ async function sendMakerSuiteRequest(request, response) {
 
     function getGeminiBody() {
         // #region UGLY MODEL LISTS AREA
-        const imageGenerationModels =  [
+        const imageGenerationModels = [
             'gemini-2.0-flash-exp',
             'gemini-2.0-flash-exp-image-generation',
         ];
@@ -914,6 +914,16 @@ async function sendXaiRequest(request, response) {
         if (request.body.reasoning_effort && ['grok-3-mini-beta', 'grok-3-mini-fast-beta'].includes(request.body.model)) {
             bodyParams['reasoning_effort'] = request.body.reasoning_effort === 'high' ? 'high' : 'low';
         }
+
+        bodyParams['search_parameters'] = request.body.enable_web_search ? {
+            "mode": "on",
+            "sources": [
+                { "type": "web", "safe_search": false },
+                { "type": "x", "safe_search": false },
+            ],
+        } : {
+            "mode": "off",
+        };
 
         const processedMessages = request.body.messages = convertXAIMessages(request.body.messages, getPromptNames(request));
 
