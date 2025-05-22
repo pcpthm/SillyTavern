@@ -44,7 +44,6 @@
     <link rel="stylesheet" type="text/css" href="css/mobile-styles.css">
     <link rel="stylesheet" type="text/css" href="css/user.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <!-- Scripts are loaded at the end of the body to improve page load speed -->
     <script>
         // This script will be executed when the DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -54,7 +53,7 @@
                 const xaiWebSearchOptions = document.getElementById('xai_web_search_options');
                 const xaiWebSearchOptionsAdvanced = document.getElementById('xai_web_search_options_advanced');
                 const xaiWebSearchOptionsFilters = document.getElementById('xai_web_search_options_filters');
-                const apiTypeSelect = document.getElementById('api_button_openai');
+                const apiTypeSelect = document.getElementById('chat_completion_source');
                 
                 if (webSearchCheckbox && xaiWebSearchOptions && apiTypeSelect) {
                     // Check if web search is enabled and API type is xAI
