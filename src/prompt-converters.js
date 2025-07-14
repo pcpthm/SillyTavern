@@ -23,6 +23,7 @@ export const PROMPT_PROCESSING_TYPE = {
     STRICT: 'strict',
     STRICT_TOOLS: 'strict_tools',
     SINGLE: 'single',
+    USER_TO_SYSTEM: 'user_to_system',
 };
 
 // 'auto' is intentionally unmapped
@@ -99,6 +100,12 @@ export function postProcessPrompt(messages, type, names) {
             return mergeMessages(messages, names, { strict: true, placeholders: true, single: false, tools: true });
         case PROMPT_PROCESSING_TYPE.SINGLE:
             return mergeMessages(messages, names, { strict: true, placeholders: false, single: true, tools: false });
+        case PROMPT_PROCESSING_TYPE.USER_TO_SYSTEM:
+            messages.forEach(msg => {
+                if (msg.role === 'user')
+                    msg.role = 'system';
+            })
+            return messages;
         default:
             return messages;
     }
