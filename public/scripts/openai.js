@@ -5828,7 +5828,7 @@ async function onModelChange() {
             $('#openai_max_context').attr('max', max_256k);
         } else if (['c4ai-aya-23-8b', 'c4ai-aya-expanse-8b'].includes(oai_settings.cohere_model)) {
             $('#openai_max_context').attr('max', max_8k);
-        } else if (['c4ai-aya-vision-8b', 'c4ai-aya-vision-32b'].includes(oai_settings.cohere_model)) {
+        } else if (['c4ai-aya-vision-8b', 'c4ai-aya-vision-32b', 'command-a-translate-08-2025'].includes(oai_settings.cohere_model)) {
             $('#openai_max_context').attr('max', max_16k);
         } else {
             $('#openai_max_context').attr('max', max_4k);
