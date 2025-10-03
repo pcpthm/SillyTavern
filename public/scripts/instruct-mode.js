@@ -476,10 +476,6 @@ export function formatInstructModeSystemPrompt(systemPrompt, _customInstruct = n
  * @returns {string} Formatted instruct mode story string.
  */
 export function formatInstructModeStoryString(storyString, { customContext = null, customInstruct = null } = {}) {
-    if (!storyString) {
-        return '';
-    }
-
     const instructSettings = structuredClone(customInstruct ?? power_user.instruct);
     const contextSettings = structuredClone(customContext ?? power_user.context);
     const storyStringPosition = contextSettings.story_string_position ?? extension_prompt_types.IN_PROMPT;
