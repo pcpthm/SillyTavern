@@ -1333,6 +1333,9 @@ chutes.post('/models', async (request, response) => {
 
         const chutesData = /** @type {{items: Array<{name: string}>}} */ (data);
         const models = chutesData.items.map(x => ({ value: x.name, text: x.name })).sort((a, b) => a?.text?.localeCompare(b?.text));
+        models.push({ value: 'chutes-hidream', text: 'Hidream' });
+        models.push({ value: 'chutes-hunyuan-image-3', text: 'Hunyuan Image 3' });
+        models.push({ value: 'chutes-z-image-turbo', text: 'Z Image Turbo' });
         return response.send(models);
     } catch (error) {
         console.error(error);
@@ -1349,6 +1352,8 @@ chutes.post('/generate', async (request, response) => {
             return response.sendStatus(400);
         }
 
+        let url = 'https://image.chutes.ai/generate';
+
         const bodyParams = {
             model: request.body.model,
             prompt: request.body.prompt,
@@ -1359,9 +1364,40 @@ chutes.post('/generate', async (request, response) => {
             num_inference_steps: request.body.steps || 10,
         };
 
-        console.debug('Chutes request:', bodyParams);
+        if (request.body.model === 'chutes-hidream') {
+            url = 'https://chutes-hidream.chutes.ai/generate';
+            delete bodyParams.model;
+            delete bodyParams.negative_prompt;
+            delete bodyParams.width;
+            delete bodyParams.height;
 
-        const result = await fetch('https://image.chutes.ai/generate', {
+            const allowedResolutions = ["1024x1024", "768x1360", "1360x768", "880x1168", "1168x880", "1248x832", "832x1248"];
+            let minRatio = Infinity;
+            for (const resolution of allowedResolutions) {
+                const [height, width] = resolution.split("x");
+                const ratio = Math.abs(Math.log((parseInt(height) / parseInt(width)) / (request.body.height / request.body.width)));
+                if (ratio < minRatio)
+                    minRatio = ratio, bodyParams.resolution = resolution;
+            }
+        } else if (request.body.model === 'chutes-hunyuan-image-3') {
+            url = 'https://chutes-hunyuan-image-3.chutes.ai/generate';
+            delete bodyParams.model;
+            delete bodyParams.negative_prompt;
+            delete bodyParams.width;
+            delete bodyParams.height;
+            delete bodyParams.guidance_scale;
+
+            bodyParams.size = `${request.body.height}x${request.body.width}`;
+            bodyParams.steps = request.body.steps;
+        } else if (request.body.model === 'chutes-z-image-turbo') {
+            url = 'https://chutes-z-image-turbo.chutes.ai/generate';
+            delete bodyParams.model;
+            delete bodyParams.negative_prompt;
+        }
+
+        console.debug('Chutes request:', url, bodyParams);
+
+        const result = await fetch(url, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${key}`,
