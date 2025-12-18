@@ -3172,6 +3172,7 @@ async function sendOpenAIRequest(type, messages, signal, { jsonSchema = null } =
             const swipes = [];
             const toolCalls = [];
             const state = { reasoning: '', images: [], signature: '', toolSignatures: {} };
+            let previousLogprobs = null;
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) return;
@@ -3190,7 +3191,13 @@ async function sendOpenAIRequest(type, messages, signal, { jsonSchema = null } =
 
                 ToolManager.parseToolCalls(toolCalls, parsed, state.toolSignatures);
 
-                yield { text, swipes: swipes, logprobs: parseChatCompletionLogprobs(parsed), toolCalls: toolCalls, state: state };
+                const logprobs = parseChatCompletionLogprobs(parsed);
+
+                // Some API returns duplicated logprobs at the role change delta.
+                const logprobsDuplicated = JSON.stringify(logprobs) === JSON.stringify(previousLogprobs);
+                previousLogprobs = logprobs;
+
+                yield { text, swipes: swipes, logprobs: logprobsDuplicated ? null : logprobs, toolCalls: toolCalls, state: state };
             }
         };
     } else {
