@@ -192,6 +192,8 @@ router.post('/status', async function (request, response) {
             return response.sendStatus(400);
         }
 
+        data.data = data.data.filter(x => x?.id);
+
         const modelIds = data.data.map(x => x.id);
         console.info('Models available:', modelIds);
 
