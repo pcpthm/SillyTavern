@@ -23,12 +23,13 @@ import { power_user, registerDebugFunction } from './power-user.js';
 import { getActiveManualApiSamplers, loadApiSelectedSamplers, isSamplerManualPriorityEnabled } from './samplerSelect.js';
 import { SECRET_KEYS, writeSecret } from './secrets.js';
 import { getEventSourceStream } from './sse-stream.js';
-import { getCurrentDreamGenModelTokenizer, getCurrentOpenRouterModelTokenizer, loadAphroditeModels, loadDreamGenModels, loadFeatherlessModels, loadGenericModels, loadInfermaticAIModels, loadLlamaCppModels, loadMancerModels, loadNebiusModels, loadOllamaModels, loadOpenRouterModels, loadTabbyModels, loadTogetherAIModels, loadVllmModels, updateOpenRouterProvidersWarning } from './textgen-models.js';
+import { getCurrentDreamGenModelTokenizer, getCurrentOpenRouterModelTokenizer, loadAphroditeModels, loadDreamGenModels, loadFeatherlessModels, loadFireworksModels, loadGenericModels, loadInfermaticAIModels, loadLlamaCppModels, loadMancerModels, loadNebiusModels, loadOllamaModels, loadOpenRouterModels, loadTabbyModels, loadTogetherAIModels, loadVllmModels, updateOpenRouterProvidersWarning } from './textgen-models.js';
 import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, TOKENIZER_SUPPORTED_KEY, getTextTokens, getTokenizerBestMatch, tokenizers } from './tokenizers.js';
 import { AbortReason } from './util/AbortReason.js';
 import { getSortableDelay, onlyUnique, arraysEqual, isObject } from './utils.js';
 
 export const textgen_types = {
+    FIREWORKS: 'fireworks',
     DEEPSEEK: "deepseek",
     NEBIUS: 'nebius',
 
@@ -50,6 +51,7 @@ export const textgen_types = {
 };
 
 const {
+    FIREWORKS,
     DEEPSEEK,
     NEBIUS,
 
@@ -123,6 +125,7 @@ export const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let FIREWORKS_SERVER = 'https://api.fireworks.ai/inference/v1';
 let DEEPSEEK_SERVER = "https://api.deepseek.com/beta";
 let NEBIUS_SERVER = 'https://api.studio.nebius.ai/v1';
 
@@ -216,6 +219,7 @@ export const textgenerationwebui_settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    fireworks_model: '',
     deepseek_model: '',
     nebius_model: '',
 
@@ -364,6 +368,8 @@ export function validateTextGenUrl() {
 export function getTextGenServer(type = null) {
     const selectedType = type ?? textgenerationwebui_settings.type;
     switch (selectedType) {
+        case FIREWORKS:
+            return FIREWORKS_SERVER;
         case DEEPSEEK:
             return DEEPSEEK_SERVER;
         case NEBIUS:
@@ -588,6 +594,7 @@ export async function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#fireworks_model').val(textgenerationwebui_settings.fireworks_model);
     $('#deepseek_model').val(textgenerationwebui_settings.deepseek_model);
     $('#nebius_model').val(textgenerationwebui_settings.nebius_model);
 
@@ -709,7 +716,10 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgenerationwebui_settings.type == textgen_types.DEEPSEEK) {
+        if (textgenerationwebui_settings.type === textgen_types.FIREWORKS) {
+            loadFireworksModels(data?.data);
+            setOnlineStatus(textgenerationwebui_settings.fireworks_model || data?.result);
+        } else if (textgenerationwebui_settings.type == textgen_types.DEEPSEEK) {
             setOnlineStatus(textgenerationwebui_settings.deepseek_model || data?.result);
         } else if (textgenerationwebui_settings.type === textgen_types.NEBIUS) {
             loadNebiusModels(data?.data);
@@ -1119,6 +1129,7 @@ export function initTextGenSettings() {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_fireworks_tg', secret: SECRET_KEYS.FIREWORKS },
             { id: 'api_key_deepseek_tg', secret: SECRET_KEYS.DEEPSEEK },
             { id: 'api_key_nebius_tg', secret: SECRET_KEYS.NEBIUS },
 
@@ -1385,6 +1396,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (textgenerationwebui_settings.type) {
+        case FIREWORKS:
         case DEEPSEEK:
         case NEBIUS:
 
@@ -1497,6 +1509,8 @@ function toIntArray(string) {
 export function getTextGenModel(settings = null) {
     settings = settings ?? textgenerationwebui_settings;
     switch (settings.type) {
+        case FIREWORKS:
+            return settings.fireworks_model;
         case DEEPSEEK:
             return settings.deepseek_model;
         case NEBIUS:
@@ -1574,6 +1588,9 @@ function isDynamicTemperatureSupported(settings = null) {
  */
 export function getLogprobsNumber(type = null) {
     const selectedType = type ?? textgenerationwebui_settings.type;
+    if (selectedType === FIREWORKS) {
+        return 5;
+    }
     if (selectedType === VLLM || selectedType === INFERMATICAI) {
         return 5;
     }
@@ -1787,6 +1804,16 @@ export function createTextGenGenerationData(settings, model, finalPrompt = null,
             : undefined,
     };
 
+    if (settings.type === FIREWORKS) {
+        params.response_format = settings.json_schema && Object.keys(settings.json_schema).length > 0 ? {
+            type: 'json_object',
+            schema: settings.json_schema,
+        } : settings.grammar_string ? {
+            type: 'grammar',
+            grammar: settings.grammar_string,
+        } : undefined;
+    }
+
     if (settings.type === NEBIUS) {
         params.best_of = vllmParams.n;
     }
@@ -1827,6 +1854,7 @@ export function createTextGenGenerationData(settings, model, finalPrompt = null,
     }
 
     switch (settings.type) {
+        case FIREWORKS:
         case NEBIUS:
 
         case VLLM:
