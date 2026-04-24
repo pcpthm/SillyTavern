@@ -652,7 +652,7 @@
                                         <input type="number" id="openai_max_tokens" name="openai_max_tokens" class="text_pole" min="1" max="128000" step="1">
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="nebius,openai,custom,xai,aimlapi,moonshot,azure_openai">
+                                <div class="range-block" data-source="fireworks,nebius,openai,custom,xai,aimlapi,moonshot,azure_openai">
                                     <div class="range-block-title" data-i18n="Multiple swipes per generation">
                                         Multiple swipes per generation
                                     </div>
@@ -736,7 +736,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="claude,aimlapi,openrouter,makersuite,vertexai,cohere,perplexity,electronhub,chutes,nanogpt,workers_ai">
+                                <div class="range-block" data-source="fireworks,claude,aimlapi,openrouter,makersuite,vertexai,cohere,perplexity,electronhub,chutes,nanogpt,workers_ai">
                                     <div class="range-block-title" data-i18n="Top K">
                                         Top K
                                     </div>
@@ -762,7 +762,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="openrouter,nanogpt,chutes,workers_ai">
+                                <div class="range-block" data-source="fireworks,openrouter,nanogpt,chutes,workers_ai">
                                     <div class="range-block-title" data-i18n="Repetition Penalty">
                                         Repetition Penalty
                                     </div>
@@ -775,7 +775,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="openrouter,nanogpt,chutes">
+                                <div class="range-block" data-source="fireworks,openrouter,nanogpt,chutes">
                                     <div class="range-block-title" data-i18n="Min P">
                                         Min P
                                     </div>
@@ -1253,7 +1253,7 @@
                                         <div class="fa-solid fa-circle-info opacity50p" title="Customize displayed samplers or add custom samplers." data-i18n="[title]Customize displayed samplers or add custom samplers."></div>
                                     </small>
                                 </div>
-                                <div data-tg-type="nebius, mancer, vllm, aphrodite, tabby, infermaticai, llamacpp" data-tg-samplers="n" class="flex-container flexFlowColumn alignitemscenter flexBasis100p flexGrow flexShrink gap0">
+                                <div data-tg-type="fireworks, nebius, mancer, vllm, aphrodite, tabby, infermaticai, llamacpp" data-tg-samplers="n" class="flex-container flexFlowColumn alignitemscenter flexBasis100p flexGrow flexShrink gap0">
                                     <small data-i18n="Multiple swipes per generation">Multiple swipes per generation</small>
                                     <input type="number" id="n_textgenerationwebui" class="text_pole textAlignCenter" min="1" value="1" step="1" />
                                 </div>
@@ -1713,7 +1713,7 @@
                                             <textarea id="negative_prompt_textgenerationwebui" class="wide100p text_pole textarea_compact" name="negative_prompt" rows="3" data-i18n="[placeholder]Add text here that would make the AI generate things you don't want in your outputs." placeholder="Add text here that would make the AI generate things you don't want in your outputs."></textarea>
                                         </div>
                                     </div>
-                                    <div id="grammar_block_ooba" data-tg-type="ooba,aphrodite,tabby" data-tg-samplers="grammar_string" class="wide100p">
+                                    <div id="grammar_block_ooba" data-tg-type="fireworks,ooba,aphrodite,tabby" data-tg-samplers="grammar_string" class="wide100p">
                                         <hr class="wide100p">
                                         <h4 class="wide100p textAlignCenter">
                                             <div class="flex-container justifyCenter alignitemscenter">
@@ -1726,7 +1726,7 @@
                                         </h4>
                                         <textarea id="grammar_string_textgenerationwebui" rows="4" class="text_pole textarea_compact monospace" data-i18n="[placeholder]Type in the desired custom grammar" placeholder="Type in the desired custom grammar"></textarea>
                                     </div>
-                                    <div id="json_schema_block" data-tg-type="tabby, llamacpp, aphrodite" data-tg-samplers="json_schema" class="wide100p">
+                                    <div id="json_schema_block" data-tg-type="fireworks, tabby, llamacpp, aphrodite" data-tg-samplers="json_schema" class="wide100p">
                                         <hr class="wide100p">
                                         <h4 class="wide100p textAlignCenter"><span data-i18n="JSON Schema">JSON Schema</span>
                                             <a href="https://json-schema.org/learn/getting-started-step-by-step" target="_blank">
@@ -2029,7 +2029,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="range-block" data-source="nebius,openrouter,custom">
+                                    <div class="range-block" data-source="fireworks,nebius,openrouter,custom">
                                         <div class="flex-container flexFlowColumn wide100p textAlignCenter marginTop10">
                                             <div class="flex-container oneline-dropdown">
                                                 <label for="tool_reasoning_mode" data-i18n="Interleaved Thinking">
@@ -2053,7 +2053,7 @@
                                             </em>
                                         </div>
                                     </div>
-                                    <div class="range-block" data-source="nebius,openai,aimlapi,openrouter,mistralai,makersuite,vertexai,claude,custom,xai,pollinations,moonshot,cohere,cometapi,nanogpt,electronhub,azure_openai,zai,siliconflow,chutes,workers_ai">
+                                    <div class="range-block" data-source="fireworks,nebius,openai,aimlapi,openrouter,mistralai,makersuite,vertexai,claude,custom,xai,pollinations,moonshot,cohere,cometapi,nanogpt,electronhub,azure_openai,zai,siliconflow,chutes,workers_ai">
                                         <label for="openai_media_inlining" class="checkbox_label flexWrap widthFreeExpand">
                                             <input id="openai_media_inlining" type="checkbox" />
                                             <span data-i18n="Send inline media">Send inline media</span>
@@ -2230,7 +2230,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="range-block m-t-1" data-source="openai,aimlapi,openrouter,custom,electronhub,azure_openai,chutes">
+                                <div class="range-block m-t-1" data-source="fireworks,openai,aimlapi,openrouter,custom,electronhub,azure_openai,chutes">
                                     <div id="logit_bias_openai" class="range-block-title openai_restorable" data-i18n="Logit Bias">
                                         Logit Bias
                                     </div>
@@ -2432,6 +2432,7 @@
                                     <option value="deepseek">DeepSeek</option>
                                     <option value="dreamgen">DreamGen</option>
                                     <option value="featherless">Featherless</option>
+                                    <option value="fireworks">Fireworks</option>
                                     <option value="generic" data-i18n="Generic (OpenAI-compatible) [LM Studio, LiteLLM, etc.]">Generic (OpenAI-compatible) [LM Studio, LiteLLM, etc.]</option>
                                     <option value="huggingface">HuggingFace (Inference Endpoint)</option>
                                     <option value="infermaticai">InfermaticAI</option>
@@ -2446,6 +2447,18 @@
                                     <option value="togetherai">TogetherAI</option>
                                     <option value="vllm">vLLM</option>
                                 </select>
+                            </div>
+                            <div data-tg-type="fireworks" class="flex-container flexFlowColumn">
+                                <h4>Fireworks API Key</h4>
+                                <div class="flex-container">
+                                    <input id="api_key_fireworks_tg" name="api_key_fireworks" class="text_pole flex1" type="text" autocomplete="off">
+                                    <div title="Clear your API key" class="menu_button fa-solid fa-circle-xmark clear-api-key" data-key="api_key_fireworks"></div>
+                                </div>
+                                <div>
+                                    <h4 data-i18n="Fireworks Model">Fireworks Model</h4>
+                                    <select id="fireworks_model">
+                                    </select>
+                                </div>
                             </div>
                             <div data-tg-type="deepseek">
                                 <h4>DeepSeek API Key</h4>
@@ -3059,6 +3072,19 @@
                                         Do not proceed if you do not agree to this!
                                     </i>
                                 </b>
+                            </div>
+                        </div>
+                        <div data-source="fireworks">
+                            <h4>Fireworks API Key</h4>
+                            <div class="flex-container">
+                                <input id="api_key_fireworks_chat" name="api_key_fireworks" class="text_pole flex1" type="text" autocomplete="off">
+                                <div title="Clear your API key" class="menu_button fa-solid fa-circle-xmark clear-api-key" data-key="api_key_fireworks"></div>
+                            </div>
+                            <div>
+                                <h4>Fireworks Model</h4>
+                                <select id="model_fireworks_select">
+                                    <option value="">-- Connect to the API --</option>
+                                </select>
                             </div>
                         </div>
                         <div data-source="nebius">

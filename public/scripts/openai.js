@@ -2740,6 +2740,7 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support the "seed" parameter
     const seedSupportedSources = [
+        chat_completion_sources.FIREWORKS,
         chat_completion_sources.NEBIUS,
 
         chat_completion_sources.OPENAI,
@@ -2774,6 +2775,7 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support logprobs
     const logprobsSupportedSources = [
+        chat_completion_sources.FIREWORKS,
         chat_completion_sources.NEBIUS,
 
         chat_completion_sources.OPENAI,
@@ -2788,6 +2790,7 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support logit bias
     const logitBiasSources = [
+        chat_completion_sources.FIREWORKS,
         chat_completion_sources.NEBIUS,
 
         chat_completion_sources.OPENAI,
@@ -2800,6 +2803,7 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support "n" parameter for multi-swipe
     const multiswipeSources = [
+        chat_completion_sources.FIREWORKS,
         chat_completion_sources.NEBIUS,
 
         chat_completion_sources.OPENAI,
@@ -2897,6 +2901,14 @@ export async function createGenerationParameters(settings, model, type, messages
     }
     if (gptSources.includes(settings.chat_completion_source) && /gpt-4.5/.test(model)) {
         delete generate_data.logprobs;
+    }
+
+    if (settings.chat_completion_source === chat_completion_sources.FIREWORKS) {
+        generate_data['top_p'] = Number(oai_settings.top_p_openai);
+        generate_data['top_k'] = Number(oai_settings.top_k_openai) || undefined;
+        generate_data['min_p'] = Number(oai_settings.min_p_openai);
+        generate_data['repetition_penalty'] = Number(oai_settings.repetition_penalty_openai);
+        generate_data['stop'] = getCustomStoppingStrings();
     }
 
     if (settings.chat_completion_source === chat_completion_sources.NEBIUS) {
@@ -6341,6 +6353,8 @@ export function isImageInliningSupported() {
     ];
 
     switch (oai_settings.chat_completion_source) {
+        case chat_completion_sources.FIREWORKS:
+            return visionSupportedModels.some(model => oai_settings.fireworks_model.includes(model));
         case chat_completion_sources.NEBIUS:
             return visionSupportedModels.some(model => oai_settings.nebius_model.toLowerCase().includes(model));
 
