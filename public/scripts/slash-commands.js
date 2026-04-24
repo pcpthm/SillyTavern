@@ -147,6 +147,16 @@ export const UNIQUE_APIS = [];
 function setupConnectAPIMap() {
     /** @type {Record<string, ConnectAPIMap>} */
     const result = {
+        'chutes': {
+            selected: 'openai',
+            button: '#api_button_openai',
+            source: chat_completion_sources.CHUTES,
+        },
+        'chutes-text': {
+            selected: 'textgenerationwebui',
+            button: '#api_button_textgenerationwebui',
+            source: textgen_types.CHUTES,
+        },
         'fireworks': {
             selected: 'openai',
             button: '#api_button_openai',
@@ -6288,6 +6298,7 @@ function setBackgroundCallback(_, bg) {
 function getModelOptions(quiet) {
     const nullResult = { control: null, options: null };
     const modelSelectMap = [
+        { id: 'chutes_model', api: 'textgenerationwebui', type: textgen_types.CHUTES },
         { id: 'fireworks_model', api: 'textgenerationwebui', type: textgen_types.FIREWORKS },
         { id: 'deepseek_model', api: 'textgenerationwebui', type: textgen_types.DEEPSEEK },
         { id: 'nebius_model', api: 'textgenerationwebui', type: textgen_types.NEBIUS },

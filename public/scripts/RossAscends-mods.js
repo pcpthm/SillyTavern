@@ -371,7 +371,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'textgenerationwebui':
-                if ((textgen_settings.type === textgen_types.FIREWORKS && secret_state[SECRET_KEYS.FIREWORKS])
+                if ((textgen_settings.type === textgen_types.CHUTES && secret_state[SECRET_KEYS.CHUTES])
+                    || (textgen_settings.type === textgen_types.FIREWORKS && secret_state[SECRET_KEYS.FIREWORKS])
                     || (textgen_settings.type === textgen_types.DEEPSEEK && secret_state[SECRET_KEYS.DEEPSEEK])
                     || (textgen_settings.type === textgen_types.NEBIUS && secret_state[SECRET_KEYS.NEBIUS])
                     || (textgen_settings.type === textgen_types.MANCER && secret_state[SECRET_KEYS.MANCER])
