@@ -176,7 +176,7 @@ const INPUT_MAP = {
     [SECRET_KEYS.GROQ]: '#api_key_groq',
     [SECRET_KEYS.FEATHERLESS]: '#api_key_featherless',
     [SECRET_KEYS.HUGGINGFACE]: '#api_key_huggingface',
-    [SECRET_KEYS.CHUTES]: '#api_key_chutes',
+    [SECRET_KEYS.CHUTES]: 'input[name="api_key_chutes"]',
     [SECRET_KEYS.ELECTRONHUB]: '#api_key_electronhub',
     [SECRET_KEYS.NANOGPT]: '#api_key_nanogpt',
     [SECRET_KEYS.GENERIC]: '#api_key_generic',

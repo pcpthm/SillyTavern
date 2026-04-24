@@ -23,12 +23,13 @@ import { power_user, registerDebugFunction } from './power-user.js';
 import { getActiveManualApiSamplers, loadApiSelectedSamplers, isSamplerManualPriorityEnabled } from './samplerSelect.js';
 import { SECRET_KEYS, writeSecret } from './secrets.js';
 import { getEventSourceStream } from './sse-stream.js';
-import { getCurrentDreamGenModelTokenizer, getCurrentOpenRouterModelTokenizer, loadAphroditeModels, loadDreamGenModels, loadFeatherlessModels, loadFireworksModels, loadGenericModels, loadInfermaticAIModels, loadLlamaCppModels, loadMancerModels, loadNebiusModels, loadOllamaModels, loadOpenRouterModels, loadTabbyModels, loadTogetherAIModels, loadVllmModels, updateOpenRouterProvidersWarning } from './textgen-models.js';
+import { getCurrentDreamGenModelTokenizer, getCurrentOpenRouterModelTokenizer, loadAphroditeModels, loadChutesModels, loadDreamGenModels, loadFeatherlessModels, loadFireworksModels, loadGenericModels, loadInfermaticAIModels, loadLlamaCppModels, loadMancerModels, loadNebiusModels, loadOllamaModels, loadOpenRouterModels, loadTabbyModels, loadTogetherAIModels, loadVllmModels, updateOpenRouterProvidersWarning } from './textgen-models.js';
 import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, TOKENIZER_SUPPORTED_KEY, getTextTokens, getTokenizerBestMatch, tokenizers } from './tokenizers.js';
 import { AbortReason } from './util/AbortReason.js';
 import { getSortableDelay, onlyUnique, arraysEqual, isObject } from './utils.js';
 
 export const textgen_types = {
+    CHUTES: 'chutes',
     FIREWORKS: 'fireworks',
     DEEPSEEK: "deepseek",
     NEBIUS: 'nebius',
@@ -51,6 +52,7 @@ export const textgen_types = {
 };
 
 const {
+    CHUTES,
     FIREWORKS,
     DEEPSEEK,
     NEBIUS,
@@ -125,6 +127,7 @@ export const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let CHUTES_SERVER = 'https://llm.chutes.ai/v1';
 let FIREWORKS_SERVER = 'https://api.fireworks.ai/inference/v1';
 let DEEPSEEK_SERVER = "https://api.deepseek.com/beta";
 let NEBIUS_SERVER = 'https://api.studio.nebius.ai/v1';
@@ -219,6 +222,7 @@ export const textgenerationwebui_settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    chutes_model: '',
     fireworks_model: '',
     deepseek_model: '',
     nebius_model: '',
@@ -368,6 +372,8 @@ export function validateTextGenUrl() {
 export function getTextGenServer(type = null) {
     const selectedType = type ?? textgenerationwebui_settings.type;
     switch (selectedType) {
+        case CHUTES:
+            return CHUTES_SERVER;
         case FIREWORKS:
             return FIREWORKS_SERVER;
         case DEEPSEEK:
@@ -594,6 +600,7 @@ export async function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#chutes_model').val(textgenerationwebui_settings.chutes_model);
     $('#fireworks_model').val(textgenerationwebui_settings.fireworks_model);
     $('#deepseek_model').val(textgenerationwebui_settings.deepseek_model);
     $('#nebius_model').val(textgenerationwebui_settings.nebius_model);
@@ -716,7 +723,10 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgenerationwebui_settings.type === textgen_types.FIREWORKS) {
+        if (textgenerationwebui_settings.type === textgen_types.CHUTES) {
+            loadChutesModels(data?.data);
+            setOnlineStatus(textgenerationwebui_settings.chutes_model || data?.result);
+        } else if (textgenerationwebui_settings.type === textgen_types.FIREWORKS) {
             loadFireworksModels(data?.data);
             setOnlineStatus(textgenerationwebui_settings.fireworks_model || data?.result);
         } else if (textgenerationwebui_settings.type == textgen_types.DEEPSEEK) {
@@ -954,7 +964,7 @@ export function initTextGenSettings() {
         const type = String($(this).val());
         textgenerationwebui_settings.type = type;
 
-        if ([NEBIUS, VLLM, APHRODITE, INFERMATICAI].includes(textgenerationwebui_settings.type)) {
+        if ([CHUTES, NEBIUS, VLLM, APHRODITE, INFERMATICAI].includes(textgenerationwebui_settings.type)) {
             $('#mirostat_mode_textgenerationwebui').attr('step', 2); //Aphro disallows mode 1
             $('#do_sample_textgenerationwebui').prop('checked', true); //Aphro should always do sample; 'otherwise set temp to 0 to mimic no sample'
             $('#ban_eos_token_textgenerationwebui').prop('checked', false); //Aphro should not ban EOS, just ignore it; 'add token '2' to ban list do to this'
@@ -1129,6 +1139,7 @@ export function initTextGenSettings() {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_chutes_tg', secret: SECRET_KEYS.CHUTES },
             { id: 'api_key_fireworks_tg', secret: SECRET_KEYS.FIREWORKS },
             { id: 'api_key_deepseek_tg', secret: SECRET_KEYS.DEEPSEEK },
             { id: 'api_key_nebius_tg', secret: SECRET_KEYS.NEBIUS },
@@ -1396,6 +1407,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (textgenerationwebui_settings.type) {
+        case CHUTES:
         case FIREWORKS:
         case DEEPSEEK:
         case NEBIUS:
@@ -1509,6 +1521,8 @@ function toIntArray(string) {
 export function getTextGenModel(settings = null) {
     settings = settings ?? textgenerationwebui_settings;
     switch (settings.type) {
+        case CHUTES:
+            return settings.chutes_model;
         case FIREWORKS:
             return settings.fireworks_model;
         case DEEPSEEK:
@@ -1804,6 +1818,10 @@ export function createTextGenGenerationData(settings, model, finalPrompt = null,
             : undefined,
     };
 
+    if (settings.type === CHUTES) {
+        params.min_new_tokens = settings.min_length || undefined;
+    }
+
     if (settings.type === FIREWORKS) {
         params.response_format = settings.json_schema && Object.keys(settings.json_schema).length > 0 ? {
             type: 'json_object',
@@ -1854,6 +1872,7 @@ export function createTextGenGenerationData(settings, model, finalPrompt = null,
     }
 
     switch (settings.type) {
+        case CHUTES:
         case FIREWORKS:
         case NEBIUS:
 

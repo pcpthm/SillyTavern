@@ -1551,6 +1551,8 @@ async function sendChutesRequest(request, response) {
             'stop': request.body.stop,
             'reasoning_effort': request.body.reasoning_effort,
             'logit_bias': request.body.logit_bias,
+            'n': request.body.n && request.body.n > 1 ? request.body.n : undefined,
+            'continue_final_message': request.body.continue_final_message || undefined,
             ...bodyParams,
         };
 

@@ -652,7 +652,7 @@
                                         <input type="number" id="openai_max_tokens" name="openai_max_tokens" class="text_pole" min="1" max="128000" step="1">
                                     </div>
                                 </div>
-                                <div class="range-block" data-source="fireworks,nebius,openai,custom,xai,aimlapi,moonshot,azure_openai">
+                                <div class="range-block" data-source="chutes,fireworks,nebius,openai,custom,xai,aimlapi,moonshot,azure_openai">
                                     <div class="range-block-title" data-i18n="Multiple swipes per generation">
                                         Multiple swipes per generation
                                     </div>
@@ -1253,7 +1253,7 @@
                                         <div class="fa-solid fa-circle-info opacity50p" title="Customize displayed samplers or add custom samplers." data-i18n="[title]Customize displayed samplers or add custom samplers."></div>
                                     </small>
                                 </div>
-                                <div data-tg-type="fireworks, nebius, mancer, vllm, aphrodite, tabby, infermaticai, llamacpp" data-tg-samplers="n" class="flex-container flexFlowColumn alignitemscenter flexBasis100p flexGrow flexShrink gap0">
+                                <div data-tg-type="chutes, fireworks, nebius, mancer, vllm, aphrodite, tabby, infermaticai, llamacpp" data-tg-samplers="n" class="flex-container flexFlowColumn alignitemscenter flexBasis100p flexGrow flexShrink gap0">
                                     <small data-i18n="Multiple swipes per generation">Multiple swipes per generation</small>
                                     <input type="number" id="n_textgenerationwebui" class="text_pole textAlignCenter" min="1" value="1" step="1" />
                                 </div>
@@ -2429,6 +2429,7 @@
                                 <h4 data-i18n="API Type">API Type</h4>
                                 <select id="textgen_type">
                                     <option value="aphrodite">Aphrodite</option>
+                                    <option value="chutes">Chutes</option>
                                     <option value="deepseek">DeepSeek</option>
                                     <option value="dreamgen">DreamGen</option>
                                     <option value="featherless">Featherless</option>
@@ -2447,6 +2448,18 @@
                                     <option value="togetherai">TogetherAI</option>
                                     <option value="vllm">vLLM</option>
                                 </select>
+                            </div>
+                            <div data-tg-type="chutes" class="flex-container flexFlowColumn">
+                                <h4>Chutes API Key</h4>
+                                <div class="flex-container">
+                                    <input id="api_key_chutes_tg" name="api_key_chutes" class="text_pole flex1" type="text" autocomplete="off">
+                                    <div title="Clear your API key" class="menu_button fa-solid fa-circle-xmark clear-api-key" data-key="api_key_chutes"></div>
+                                </div>
+                                <div>
+                                    <h4 data-i18n="Chutes Model">Chutes Model</h4>
+                                    <select id="chutes_model">
+                                    </select>
+                                </div>
                             </div>
                             <div data-tg-type="fireworks" class="flex-container flexFlowColumn">
                                 <h4>Fireworks API Key</h4>

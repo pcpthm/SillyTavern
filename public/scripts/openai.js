@@ -2803,6 +2803,7 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support "n" parameter for multi-swipe
     const multiswipeSources = [
+        chat_completion_sources.CHUTES,
         chat_completion_sources.FIREWORKS,
         chat_completion_sources.NEBIUS,
 
@@ -3034,10 +3035,11 @@ export async function createGenerationParameters(settings, model, type, messages
     }
 
     if (settings.chat_completion_source === chat_completion_sources.CHUTES) {
-        generate_data.min_p = Number(settings.min_p_openai);
-        generate_data.top_k = settings.top_k_openai > 0 ? Number(settings.top_k_openai) : undefined;
-        generate_data.repetition_penalty = Number(settings.repetition_penalty_openai);
-        generate_data.stop = getCustomStoppingStrings();
+        generate_data['min_p'] = Number(settings.min_p_openai);
+        generate_data['top_k'] = settings.top_k_openai > 0 ? Number(settings.top_k_openai) : undefined;
+        generate_data['repetition_penalty'] = Number(settings.repetition_penalty_openai);
+        generate_data['stop'] = getCustomStoppingStrings();
+        generate_data['continue_final_message'] = type === 'continue' || messages[messages.length - 1]?.role === "assistant" || undefined;
     }
 
     // https://docs.z.ai/api-reference/llm/chat-completion

@@ -6251,6 +6251,7 @@ function parseAndSaveLogprobs(data, continueFrom) {
                 case textgen_types.LLAMACPP: {
                     logprobs = data?.completion_probabilities?.map(x => parseTextgenLogprobs(x.content, [x])) || null;
                 } break;
+                case textgen_types.CHUTES:
                 case textgen_types.FIREWORKS:
                 case textgen_types.NEBIUS:
 
