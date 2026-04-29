@@ -147,6 +147,16 @@ export const UNIQUE_APIS = [];
 function setupConnectAPIMap() {
     /** @type {Record<string, ConnectAPIMap>} */
     const result = {
+        'deepseek': {
+            selected: 'openai',
+            button: '#api_button_openai',
+            source: chat_completion_sources.DEEPSEEK,
+        },
+        'deepseek-text': {
+            selected: 'textgenerationwebui',
+            button: '#api_button_textgenerationwebui',
+            source: textgen_types.DEEPSEEK,
+        },
         'nebius': {
             selected: 'openai',
             button: '#api_button_openai',
@@ -6268,6 +6278,7 @@ function setBackgroundCallback(_, bg) {
 function getModelOptions(quiet) {
     const nullResult = { control: null, options: null };
     const modelSelectMap = [
+        { id: 'deepseek_model', api: 'textgenerationwebui', type: textgen_types.DEEPSEEK },
         { id: 'nebius_model', api: 'textgenerationwebui', type: textgen_types.NEBIUS },
 
         { id: 'generic_model_textgenerationwebui', api: 'textgenerationwebui', type: textgen_types.GENERIC },

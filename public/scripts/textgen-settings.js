@@ -29,6 +29,7 @@ import { AbortReason } from './util/AbortReason.js';
 import { getSortableDelay, onlyUnique, arraysEqual, isObject } from './utils.js';
 
 export const textgen_types = {
+    DEEPSEEK: "deepseek",
     NEBIUS: 'nebius',
 
     OOBA: 'ooba',
@@ -49,6 +50,7 @@ export const textgen_types = {
 };
 
 const {
+    DEEPSEEK,
     NEBIUS,
 
     GENERIC,
@@ -121,6 +123,7 @@ export const APHRODITE_DEFAULT_ORDER = [
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
 
+let DEEPSEEK_SERVER = "https://api.deepseek.com/beta";
 let NEBIUS_SERVER = 'https://api.studio.nebius.ai/v1';
 
 // Maybe let it be configurable in the future?
@@ -213,6 +216,7 @@ export const textgenerationwebui_settings = {
     speculative_ngram: false,
     type: textgen_types.OOBA,
 
+    deepseek_model: '',
     nebius_model: '',
 
     mancer_model: 'mytholite',
@@ -360,6 +364,8 @@ export function validateTextGenUrl() {
 export function getTextGenServer(type = null) {
     const selectedType = type ?? textgenerationwebui_settings.type;
     switch (selectedType) {
+        case DEEPSEEK:
+            return DEEPSEEK_SERVER;
         case NEBIUS:
             return NEBIUS_SERVER;
 
@@ -582,6 +588,7 @@ export async function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#deepseek_model').val(textgenerationwebui_settings.deepseek_model);
     $('#nebius_model').val(textgenerationwebui_settings.nebius_model);
 
     if (loadedSettings.api_use_mancer_webui) {
@@ -702,10 +709,12 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgenerationwebui_settings.type === textgen_types.NEBIUS) {
+        if (textgenerationwebui_settings.type == textgen_types.DEEPSEEK) {
+            setOnlineStatus(textgenerationwebui_settings.deepseek_model || data?.result);
+        } else if (textgenerationwebui_settings.type === textgen_types.NEBIUS) {
             loadNebiusModels(data?.data);
             setOnlineStatus(textgenerationwebui_settings.nebius_model);
-        } if (textgenerationwebui_settings.type === textgen_types.MANCER) {
+        } else if (textgenerationwebui_settings.type === textgen_types.MANCER) {
             loadMancerModels(data?.data);
             setOnlineStatus(textgenerationwebui_settings.mancer_model);
         } else if (textgenerationwebui_settings.type === textgen_types.TOGETHERAI) {
@@ -1110,6 +1119,7 @@ export function initTextGenSettings() {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_deepseek_tg', secret: SECRET_KEYS.DEEPSEEK },
             { id: 'api_key_nebius_tg', secret: SECRET_KEYS.NEBIUS },
 
             { id: 'api_key_mancer', secret: SECRET_KEYS.MANCER },
@@ -1375,6 +1385,7 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (textgenerationwebui_settings.type) {
+        case DEEPSEEK:
         case NEBIUS:
 
         case KOBOLDCPP:
@@ -1486,6 +1497,8 @@ function toIntArray(string) {
 export function getTextGenModel(settings = null) {
     settings = settings ?? textgenerationwebui_settings;
     switch (settings.type) {
+        case DEEPSEEK:
+            return settings.deepseek_model;
         case NEBIUS:
             return settings.nebius_model;
 

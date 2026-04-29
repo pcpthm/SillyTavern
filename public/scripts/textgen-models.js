@@ -1040,6 +1040,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function onDeepSeekModelSelect() {
+    const modelId = String($('#deepseek_model').val());
+    textgen_settings.deepseek_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onNebiusModelSelect() {
     const modelId = String($('#nebius_model').val());
     textgen_settings.nebius_model = modelId;
@@ -1408,6 +1414,7 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#deepseek_model').on('change', onDeepSeekModelSelect);
     $('#nebius_model').on('change', onNebiusModelSelect);
 
     $('#mancer_model').on('change', onMancerModelSelect);

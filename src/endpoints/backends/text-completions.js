@@ -4,6 +4,7 @@ import express from 'express';
 import _ from 'lodash';
 
 import {
+    DEEPSEEK_KEYS,
     NEBIUS_KEYS,
 
     TEXTGEN_TYPES,
@@ -121,6 +122,10 @@ router.post('/status', async function (request, response) {
         let result = '';
 
         switch (apiType) {
+            case TEXTGEN_TYPES.DEEPSEEK:
+                url = url.replace(/\/beta$/, "") + '/models';
+                break;
+
             case TEXTGEN_TYPES.NEBIUS:
 
             case TEXTGEN_TYPES.GENERIC:
@@ -298,6 +303,7 @@ router.post('/generate', async function (request, response) {
         let url = trimV1(baseUrl);
 
         switch (request.body.api_type) {
+            case TEXTGEN_TYPES.DEEPSEEK:
             case TEXTGEN_TYPES.NEBIUS:
 
             case TEXTGEN_TYPES.GENERIC:
@@ -338,6 +344,11 @@ router.post('/generate', async function (request, response) {
         };
 
         setAdditionalHeaders(request, args, baseUrl);
+
+        if (request.body.api_type === TEXTGEN_TYPES.DEEPSEEK) {
+            request.body = _.pickBy(request.body, (_, key) => DEEPSEEK_KEYS.includes(key));
+            args.body = JSON.stringify(request.body);
+        }
 
         if (request.body.api_type === TEXTGEN_TYPES.NEBIUS) {
             request.body = _.pickBy(request.body, (_, key) => NEBIUS_KEYS.includes(key));

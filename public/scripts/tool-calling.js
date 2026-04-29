@@ -655,6 +655,7 @@ export class ToolManager {
         }
 
         const supportedSources = [
+            chat_completion_sources.DEEPSEEK,
             chat_completion_sources.NEBIUS,
             chat_completion_sources.OPENAI,
             chat_completion_sources.CUSTOM,
