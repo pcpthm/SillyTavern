@@ -147,6 +147,37 @@ export const UNIQUE_APIS = [];
 function setupConnectAPIMap() {
     /** @type {Record<string, ConnectAPIMap>} */
     const result = {
+        'nebius': {
+            selected: 'openai',
+            button: '#api_button_openai',
+            source: chat_completion_sources.NEBIUS,
+        },
+        'nebius-text': {
+            selected: 'textgenerationwebui',
+            button: '#api_button_textgenerationwebui',
+            source: textgen_types.NEBIUS,
+        },
+        'xai': {
+            selected: 'openai',
+            button: '#api_button_openai',
+            source: chat_completion_sources.XAI,
+        },
+        'xai-text': {
+            selected: 'textgenerationwebui',
+            button: '#api_button_textgenerationwebui',
+            source: textgen_types.XAI,
+        },
+        'hyperbolic': {
+            selected: 'openai',
+            button: '#api_button_openai',
+            source: chat_completion_sources.HYPERBOLIC,
+        },
+        'hyperbolic-text': {
+            selected: 'textgenerationwebui',
+            button: '#api_button_textgenerationwebui',
+            source: textgen_types.HYPERBOLIC,
+        },
+
         // Default APIs not contained inside text gen / chat gen
         'kobold': {
             selected: 'kobold',
@@ -6237,6 +6268,8 @@ function setBackgroundCallback(_, bg) {
 function getModelOptions(quiet) {
     const nullResult = { control: null, options: null };
     const modelSelectMap = [
+        { id: 'nebius_model', api: 'textgenerationwebui', type: textgen_types.NEBIUS },
+
         { id: 'generic_model_textgenerationwebui', api: 'textgenerationwebui', type: textgen_types.GENERIC },
         { id: 'custom_model_textgenerationwebui', api: 'textgenerationwebui', type: textgen_types.OOBA },
         { id: 'model_togetherai_select', api: 'textgenerationwebui', type: textgen_types.TOGETHERAI },
@@ -6250,6 +6283,9 @@ function getModelOptions(quiet) {
         { id: 'tabby_model', api: 'textgenerationwebui', type: textgen_types.TABBY },
         { id: 'llamacpp_model', api: 'textgenerationwebui', type: textgen_types.LLAMACPP },
         { id: 'featherless_model', api: 'textgenerationwebui', type: textgen_types.FEATHERLESS },
+
+        { id: 'model_nebius_select', api: 'openai', type: chat_completion_sources.NEBIUS },
+
         { id: 'model_openai_select', api: 'openai', type: chat_completion_sources.OPENAI },
         { id: 'model_claude_select', api: 'openai', type: chat_completion_sources.CLAUDE },
         { id: 'model_openrouter_select', api: 'openai', type: chat_completion_sources.OPENROUTER },

@@ -185,6 +185,7 @@ export const VERTEX_SAFETY = [
 ];
 
 export const CHAT_COMPLETION_SOURCES = {
+    NEBIUS: 'nebius',
     OPENAI: 'openai',
     CLAUDE: 'claude',
     OPENROUTER: 'openrouter',
@@ -220,6 +221,8 @@ export const UPLOADS_DIRECTORY = '_uploads';
 
 // TODO: this is copied from the client code; there should be a way to de-duplicate it eventually
 export const TEXTGEN_TYPES = {
+    NEBIUS: 'nebius',
+
     OOBA: 'ooba',
     MANCER: 'mancer',
     VLLM: 'vllm',
@@ -236,6 +239,28 @@ export const TEXTGEN_TYPES = {
     HUGGINGFACE: 'huggingface',
     GENERIC: 'generic',
 };
+
+export const NEBIUS_KEYS = [
+    'prompt',
+    'model',
+    'frequency_penalty',
+    'logit_bias',
+    'logprobs',
+    'top_logprobs',
+    'max_tokens',
+    'n',
+    'presence_penalty',
+    'seed',
+    'stop',
+    'stream',
+    'temperature',
+    'top_p',
+    'user',
+    'top_k',
+    'min_p',
+    'repetition_penalty',
+    'best_of',
+];
 
 export const INFERMATICAI_KEYS = [
     'model',

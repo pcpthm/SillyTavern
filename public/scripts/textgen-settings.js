@@ -23,12 +23,14 @@ import { power_user, registerDebugFunction } from './power-user.js';
 import { getActiveManualApiSamplers, loadApiSelectedSamplers, isSamplerManualPriorityEnabled } from './samplerSelect.js';
 import { SECRET_KEYS, writeSecret } from './secrets.js';
 import { getEventSourceStream } from './sse-stream.js';
-import { getCurrentDreamGenModelTokenizer, getCurrentOpenRouterModelTokenizer, loadAphroditeModels, loadDreamGenModels, loadFeatherlessModels, loadGenericModels, loadInfermaticAIModels, loadLlamaCppModels, loadMancerModels, loadOllamaModels, loadOpenRouterModels, loadTabbyModels, loadTogetherAIModels, loadVllmModels, updateOpenRouterProvidersWarning } from './textgen-models.js';
+import { getCurrentDreamGenModelTokenizer, getCurrentOpenRouterModelTokenizer, loadAphroditeModels, loadDreamGenModels, loadFeatherlessModels, loadGenericModels, loadInfermaticAIModels, loadLlamaCppModels, loadMancerModels, loadNebiusModels, loadOllamaModels, loadOpenRouterModels, loadTabbyModels, loadTogetherAIModels, loadVllmModels, updateOpenRouterProvidersWarning } from './textgen-models.js';
 import { ENCODE_TOKENIZERS, TEXTGEN_TOKENIZERS, TOKENIZER_SUPPORTED_KEY, getTextTokens, getTokenizerBestMatch, tokenizers } from './tokenizers.js';
 import { AbortReason } from './util/AbortReason.js';
 import { getSortableDelay, onlyUnique, arraysEqual, isObject } from './utils.js';
 
 export const textgen_types = {
+    NEBIUS: 'nebius',
+
     OOBA: 'ooba',
     MANCER: 'mancer',
     VLLM: 'vllm',
@@ -47,6 +49,8 @@ export const textgen_types = {
 };
 
 const {
+    NEBIUS,
+
     GENERIC,
     MANCER,
     VLLM,
@@ -116,6 +120,8 @@ export const APHRODITE_DEFAULT_ORDER = [
     'xtc',
 ];
 const BIAS_KEY = '#textgenerationwebui_api-settings';
+
+let NEBIUS_SERVER = 'https://api.studio.nebius.ai/v1';
 
 // Maybe let it be configurable in the future?
 // (7 days later) The future has come.
@@ -206,6 +212,9 @@ export const textgenerationwebui_settings = {
     spaces_between_special_tokens: true,
     speculative_ngram: false,
     type: textgen_types.OOBA,
+
+    nebius_model: '',
+
     mancer_model: 'mytholite',
     togetherai_model: 'Gryphe/MythoMax-L2-13b',
     infermaticai_model: '',
@@ -351,6 +360,9 @@ export function validateTextGenUrl() {
 export function getTextGenServer(type = null) {
     const selectedType = type ?? textgenerationwebui_settings.type;
     switch (selectedType) {
+        case NEBIUS:
+            return NEBIUS_SERVER;
+
         case FEATHERLESS:
             return FEATHERLESS_SERVER;
         case MANCER:
@@ -570,6 +582,8 @@ export async function loadTextGenSettings(data, loadedSettings) {
         });
     }
 
+    $('#nebius_model').val(textgenerationwebui_settings.nebius_model);
+
     if (loadedSettings.api_use_mancer_webui) {
         textgenerationwebui_settings.type = MANCER;
     }
@@ -688,7 +702,10 @@ async function getStatusTextgen() {
 
         const data = await response.json();
 
-        if (textgenerationwebui_settings.type === textgen_types.MANCER) {
+        if (textgenerationwebui_settings.type === textgen_types.NEBIUS) {
+            loadNebiusModels(data?.data);
+            setOnlineStatus(textgenerationwebui_settings.nebius_model);
+        } if (textgenerationwebui_settings.type === textgen_types.MANCER) {
             loadMancerModels(data?.data);
             setOnlineStatus(textgenerationwebui_settings.mancer_model);
         } else if (textgenerationwebui_settings.type === textgen_types.TOGETHERAI) {
@@ -918,7 +935,7 @@ export function initTextGenSettings() {
         const type = String($(this).val());
         textgenerationwebui_settings.type = type;
 
-        if ([VLLM, APHRODITE, INFERMATICAI].includes(textgenerationwebui_settings.type)) {
+        if ([NEBIUS, VLLM, APHRODITE, INFERMATICAI].includes(textgenerationwebui_settings.type)) {
             $('#mirostat_mode_textgenerationwebui').attr('step', 2); //Aphro disallows mode 1
             $('#do_sample_textgenerationwebui').prop('checked', true); //Aphro should always do sample; 'otherwise set temp to 0 to mimic no sample'
             $('#ban_eos_token_textgenerationwebui').prop('checked', false); //Aphro should not ban EOS, just ignore it; 'add token '2' to ban list do to this'
@@ -1093,6 +1110,8 @@ export function initTextGenSettings() {
 
     $('#api_button_textgenerationwebui').on('click', async function (e) {
         const keys = [
+            { id: 'api_key_nebius_tg', secret: SECRET_KEYS.NEBIUS },
+
             { id: 'api_key_mancer', secret: SECRET_KEYS.MANCER },
             { id: 'api_key_vllm', secret: SECRET_KEYS.VLLM },
             { id: 'api_key_aphrodite', secret: SECRET_KEYS.APHRODITE },
@@ -1356,6 +1375,8 @@ export function parseTextgenLogprobs(token, logprobs) {
     }
 
     switch (textgenerationwebui_settings.type) {
+        case NEBIUS:
+
         case KOBOLDCPP:
         case TABBY:
         case VLLM:
@@ -1465,6 +1486,9 @@ function toIntArray(string) {
 export function getTextGenModel(settings = null) {
     settings = settings ?? textgenerationwebui_settings;
     switch (settings.type) {
+        case NEBIUS:
+            return settings.nebius_model;
+
         case OOBA:
             if (settings.custom_model) {
                 return settings.custom_model;
@@ -1750,6 +1774,10 @@ export function createTextGenGenerationData(settings, model, finalPrompt = null,
             : undefined,
     };
 
+    if (settings.type === NEBIUS) {
+        params.best_of = vllmParams.n;
+    }
+
     if (settings.type === OPENROUTER) {
         params.provider = settings.openrouter_providers;
         params.quantizations = settings.openrouter_quantizations;
@@ -1786,6 +1814,8 @@ export function createTextGenGenerationData(settings, model, finalPrompt = null,
     }
 
     switch (settings.type) {
+        case NEBIUS:
+
         case VLLM:
         case INFERMATICAI:
             params = Object.assign(params, vllmParams);

@@ -371,7 +371,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'textgenerationwebui':
-                if ((textgen_settings.type === textgen_types.MANCER && secret_state[SECRET_KEYS.MANCER])
+                if ((textgen_settings.type === textgen_types.NEBIUS && secret_state[SECRET_KEYS.NEBIUS])
+                    || (textgen_settings.type === textgen_types.MANCER && secret_state[SECRET_KEYS.MANCER])
                     || (textgen_settings.type === textgen_types.TOGETHERAI && secret_state[SECRET_KEYS.TOGETHERAI])
                     || (textgen_settings.type === textgen_types.INFERMATICAI && secret_state[SECRET_KEYS.INFERMATICAI])
                     || (textgen_settings.type === textgen_types.DREAMGEN && secret_state[SECRET_KEYS.DREAMGEN])
@@ -384,7 +385,8 @@ function RA_autoconnect(PrevApi) {
                 }
                 break;
             case 'openai':
-                if (((secret_state[SECRET_KEYS.OPENAI] || oai_settings.reverse_proxy) && oai_settings.chat_completion_source == chat_completion_sources.OPENAI)
+                if ((secret_state[SECRET_KEYS.NEBIUS] && oai_settings.chat_completion_source == chat_completion_sources.NEBIUS)
+                    || ((secret_state[SECRET_KEYS.OPENAI] || oai_settings.reverse_proxy) && oai_settings.chat_completion_source == chat_completion_sources.OPENAI)
                     || ((secret_state[SECRET_KEYS.CLAUDE] || oai_settings.reverse_proxy) && oai_settings.chat_completion_source == chat_completion_sources.CLAUDE)
                     || (secret_state[SECRET_KEYS.OPENROUTER] && oai_settings.chat_completion_source == chat_completion_sources.OPENROUTER)
                     || (secret_state[SECRET_KEYS.AI21] && oai_settings.chat_completion_source == chat_completion_sources.AI21)
@@ -971,9 +973,9 @@ export function initRossMods() {
     function isModifiedKeyboardEvent(event) {
         return (event instanceof KeyboardEvent &&
             (event.shiftKey ||
-            event.ctrlKey ||
-            event.altKey ||
-            event.metaKey));
+                event.ctrlKey ||
+                event.altKey ||
+                event.metaKey));
     }
 
     $(document).on('keydown', async function (event) {

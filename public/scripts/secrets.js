@@ -17,6 +17,8 @@ import { copyText, isTrueBoolean, uuidv4 } from './utils.js';
 import { accountStorage } from './util/AccountStorage.js';
 
 export const SECRET_KEYS = {
+    NEBIUS: 'api_key_nebius',
+
     HORDE: 'api_key_horde',
     MANCER: 'api_key_mancer',
     VLLM: 'api_key_vllm',
@@ -147,6 +149,8 @@ const FRIENDLY_NAMES = {
 };
 
 const INPUT_MAP = {
+    [SECRET_KEYS.NEBIUS]: 'input[name="api_key_nebius"]',
+
     [SECRET_KEYS.HORDE]: '#horde_api_key',
     [SECRET_KEYS.MANCER]: '#api_key_mancer',
     [SECRET_KEYS.OPENAI]: '#api_key_openai',
