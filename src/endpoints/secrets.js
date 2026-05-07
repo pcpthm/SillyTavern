@@ -8,6 +8,8 @@ import { color, getConfigValue, uuidv4 } from '../util.js';
 export const SECRETS_FILE = 'secrets.json';
 export const SECRET_KEYS = {
     _MIGRATED: '_migrated',
+    NEBIUS: 'api_key_nebius',
+
     HORDE: 'api_key_horde',
     MANCER: 'api_key_mancer',
     VLLM: 'api_key_vllm',

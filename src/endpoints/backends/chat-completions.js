@@ -70,6 +70,8 @@ import { getVertexAIAuth, getProjectIdFromServiceAccount } from '../google.js';
 import { getCookieSecret } from '../../users.js';
 import { fetchGoogleModels, GoogleModelsHttpError } from './google-models.js';
 
+const API_NEBIUS = 'https://api.studio.nebius.ai/v1';
+
 const API_OPENAI = 'https://api.openai.com/v1';
 const API_CLAUDE = 'https://api.anthropic.com/v1';
 const API_MISTRAL = 'https://api.mistral.ai/v1';
@@ -1774,7 +1776,11 @@ router.post('/status', async function (request, statusResponse) {
         let headers = {};
         let queryParams = {};
 
-        if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.OPENAI) {
+        if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.NEBIUS) {
+            apiUrl = API_NEBIUS;
+            apiKey = readSecret(request.user.directories, SECRET_KEYS.NEBIUS);
+            headers = {};
+        } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.OPENAI) {
             apiUrl = new URL(request.body.reverse_proxy || API_OPENAI).toString();
             apiKey = request.body.reverse_proxy ? request.body.proxy_password : readSecret(request.user.directories, SECRET_KEYS.OPENAI, request.body.secret_id);
             headers = {};
@@ -2268,7 +2274,17 @@ router.post('/generate', async function (request, response) {
         let bodyParams;
         const isTextCompletion = Boolean(request.body.model && TEXT_COMPLETION_MODELS.includes(request.body.model)) || typeof request.body.messages === 'string';
 
-        if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.OPENAI) {
+        if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.NEBIUS) {
+            apiUrl = API_NEBIUS;
+            apiKey = readSecret(request.user.directories, SECRET_KEYS.NEBIUS);
+            headers = {};
+            bodyParams = {
+                min_p: request.body.min_p,
+                repetition_penalty: request.body.repetition_penalty,
+                logprobs: request.body.logprobs > 0,
+                top_logprobs: request.body.logprobs || undefined,
+            };
+        } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.OPENAI) {
             apiUrl = new URL(request.body.reverse_proxy || API_OPENAI).toString();
             apiKey = request.body.reverse_proxy ? request.body.proxy_password : readSecret(request.user.directories, SECRET_KEYS.OPENAI, request.body.secret_id);
             headers = {};

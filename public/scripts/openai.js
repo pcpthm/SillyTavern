@@ -175,6 +175,8 @@ let biasCache = undefined;
 export let model_list = [];
 
 export const chat_completion_sources = {
+    NEBIUS: 'nebius',
+
     OPENAI: 'openai',
     CLAUDE: 'claude',
     OPENROUTER: 'openrouter',
@@ -315,6 +317,9 @@ export const settingsToUpdate = {
     max_context_unlocked: ['#oai_max_context_unlocked', 'max_context_unlocked', true, false],
     group_models: ['#cc_group_models', 'group_models', true, true],
     sort_models: ['#cc_sort_models', 'sort_models', false, true],
+
+    nebius_model: ['#model_nebius_select', 'nebius_model', false, true],
+
     openai_model: ['#model_openai_select', 'openai_model', false, true],
     claude_model: ['#model_claude_select', 'claude_model', false, true],
     openrouter_model: ['#model_openrouter_select', 'openrouter_model', false, true],
@@ -437,6 +442,7 @@ const default_settings = {
     personality_format: default_personality_format,
     sort_models: 'alphabetically',
     group_models: false,
+    nebius_model: '',
     openai_model: 'gpt-5.6-terra',
     claude_model: 'claude-sonnet-5',
     google_model: 'gemini-3.7-flash',
@@ -1723,6 +1729,9 @@ export function getChatCompletionModel(settings = null) {
     settings = settings ?? oai_settings;
     const source = settings.chat_completion_source;
     switch (source) {
+        case chat_completion_sources.NEBIUS:
+            return oai_settings.nebius_model;
+
         case chat_completion_sources.CLAUDE:
             return settings.claude_model;
         case chat_completion_sources.OPENAI:
@@ -2025,6 +2034,23 @@ function getAimlapiModelTemplate(option) {
 function saveModelList(data) {
     model_list = data.map((model) => ({ ...model }));
     model_list.sort((a, b) => a?.id && b?.id && a.id.localeCompare(b.id));
+
+    if (oai_settings.chat_completion_source == chat_completion_sources.NEBIUS) {
+        $('#model_nebius_select').empty();
+        model_list.forEach((model) => {
+            $('#model_nebius_select').append(
+                $('<option>', {
+                    value: model.id,
+                    text: model.id,
+                }));
+        });
+        const selectedModel = model_list.find(model => model.id === oai_settings.nebius_model);
+        if (model_list.length > 0 && (!selectedModel || !oai_settings.nebius_model)) {
+            oai_settings.nebius_model = model_list[0].id;
+        }
+
+        $('#model_nebius_select').val(oai_settings.nebius_model).trigger('change');
+    }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.OPENROUTER) {
         model_list = sortModelsBy(model_list, oai_settings.sort_models, chat_completion_sources.OPENROUTER);
@@ -2714,6 +2740,8 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support the "seed" parameter
     const seedSupportedSources = [
+        chat_completion_sources.NEBIUS,
+
         chat_completion_sources.OPENAI,
         chat_completion_sources.AZURE_OPENAI,
         chat_completion_sources.OPENROUTER,
@@ -2746,6 +2774,8 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support logprobs
     const logprobsSupportedSources = [
+        chat_completion_sources.NEBIUS,
+
         chat_completion_sources.OPENAI,
         chat_completion_sources.AZURE_OPENAI,
         chat_completion_sources.OPENROUTER,
@@ -2758,6 +2788,8 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support logit bias
     const logitBiasSources = [
+        chat_completion_sources.NEBIUS,
+
         chat_completion_sources.OPENAI,
         chat_completion_sources.AZURE_OPENAI,
         chat_completion_sources.OPENROUTER,
@@ -2768,6 +2800,8 @@ export async function createGenerationParameters(settings, model, type, messages
 
     // Sources that support "n" parameter for multi-swipe
     const multiswipeSources = [
+        chat_completion_sources.NEBIUS,
+
         chat_completion_sources.OPENAI,
         chat_completion_sources.AZURE_OPENAI,
         chat_completion_sources.CUSTOM,
@@ -2863,6 +2897,11 @@ export async function createGenerationParameters(settings, model, type, messages
     }
     if (gptSources.includes(settings.chat_completion_source) && /gpt-4.5/.test(model)) {
         delete generate_data.logprobs;
+    }
+
+    if (settings.chat_completion_source === chat_completion_sources.NEBIUS) {
+        generate_data['top_p'] = Number(oai_settings.top_p_openai);
+        generate_data['stop'] = getCustomStoppingStrings();
     }
 
     if (settings.chat_completion_source === chat_completion_sources.CLAUDE) {
@@ -6035,6 +6074,8 @@ async function onConnectButtonClick(e) {
 
     /** @type {Object.<string, {key: string, selector: string, proxy?: boolean, keyless?: boolean}>} */
     const apiSourceConfig = {
+        [chat_completion_sources.NEBIUS]: { key: SECRET_KEYS.NEBIUS, selector: '#api_key_nebius_chat', proxy: false },
+
         [chat_completion_sources.OPENROUTER]: { key: SECRET_KEYS.OPENROUTER, selector: '#api_key_openrouter', proxy: false },
         [chat_completion_sources.MAKERSUITE]: { key: SECRET_KEYS.MAKERSUITE, selector: '#api_key_makersuite', proxy: true },
         [chat_completion_sources.CLAUDE]: { key: SECRET_KEYS.CLAUDE, selector: '#api_key_claude', proxy: true },
@@ -6095,7 +6136,10 @@ async function onConnectButtonClick(e) {
 }
 
 function toggleChatCompletionForms() {
-    if (oai_settings.chat_completion_source == chat_completion_sources.CLAUDE) {
+    if (oai_settings.chat_completion_source == chat_completion_sources.NEBIUS) {
+        $('#model_nebius_select').trigger('change');
+    }
+    else if (oai_settings.chat_completion_source == chat_completion_sources.CLAUDE) {
         $('#model_claude_select').trigger('change');
     } else if (oai_settings.chat_completion_source == chat_completion_sources.OPENAI) {
         if (oai_settings.show_external_models && (!Array.isArray(model_list) || model_list.length == 0)) {
@@ -6297,6 +6341,9 @@ export function isImageInliningSupported() {
     ];
 
     switch (oai_settings.chat_completion_source) {
+        case chat_completion_sources.NEBIUS:
+            return visionSupportedModels.some(model => oai_settings.nebius_model.toLowerCase().includes(model));
+
         case chat_completion_sources.OPENAI:
         case chat_completion_sources.AZURE_OPENAI: {
             const modelToCheck = oai_settings.chat_completion_source === chat_completion_sources.AZURE_OPENAI
@@ -7298,6 +7345,7 @@ export function initOpenAI() {
         oai_settings.bind_preset_to_connection = !!$(this).prop('checked');
         saveSettingsDebounced();
     });
+    $('#model_nebius_select').on('change', onModelChange);
 
     $('#cc_group_models').on('input', async () => {
         oai_settings.group_models = $('#cc_group_models').prop('checked');

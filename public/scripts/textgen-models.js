@@ -415,6 +415,22 @@ export async function syncOpenRouterProvidersForModel(modelId, providersSelector
     }
 }
 
+export async function loadNebiusModels(data) {
+    if (!Array.isArray(data)) {
+        console.error('Invalid Nebius models data', data);
+        return;
+    }
+
+    $('#nebius_model').empty();
+    for (const model of data) {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.text = model.id;
+        option.selected = model.id === textgen_settings.nebius_model;
+        $('#nebius_model').append(option);
+    }
+}
+
 export async function syncNanoGptProvidersForModel(modelId, providersSelector) {
     const $providers = $(providersSelector);
 
@@ -1023,6 +1039,13 @@ document.addEventListener('DOMContentLoaded', function () {
         featherlessIsGridView = !featherlessIsGridView;
     });
 });
+
+function onNebiusModelSelect() {
+    const modelId = String($('#nebius_model').val());
+    textgen_settings.nebius_model = modelId;
+    $('#api_button_textgenerationwebui').trigger('click');
+}
+
 function onMancerModelSelect() {
     const modelId = String($('#mancer_model').val());
     textgen_settings.mancer_model = modelId;
@@ -1385,6 +1408,8 @@ export function getCurrentDreamGenModelTokenizer() {
 }
 
 export function initTextGenModels() {
+    $('#nebius_model').on('change', onNebiusModelSelect);
+
     $('#mancer_model').on('change', onMancerModelSelect);
     $('#model_togetherai_select').on('change', onTogetherModelSelect);
     $('#model_infermaticai_select').on('change', onInfermaticAIModelSelect);
