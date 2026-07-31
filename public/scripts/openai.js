@@ -393,6 +393,7 @@ export const settingsToUpdate = {
     media_inlining: ['#openai_media_inlining', 'media_inlining', true, false],
     inline_image_quality: ['#openai_inline_image_quality', 'inline_image_quality', false, false],
     continue_prefill: ['#continue_prefill', 'continue_prefill', true, false],
+    send_reasoning_content: ['#openai_send_reasoning_content', 'send_reasoning_content', true, false],
     continue_postfix: ['#continue_postfix', 'continue_postfix', false, false],
     function_calling: ['#openai_function_calling', 'function_calling', true, false],
     tool_call_recurse_limit: ['#tool_call_recurse_limit', 'tool_call_recurse_limit', false, false],
@@ -505,6 +506,7 @@ const default_settings = {
     inline_image_quality: 'auto',
     bypass_status_check: false,
     continue_prefill: false,
+    send_reasoning_content: false,
     function_calling: false,
     tool_call_recurse_limit: 5,
     names_behavior: character_names_behavior.DEFAULT,
@@ -2701,6 +2703,82 @@ function getVerbosity(settings = null) {
     return settings.verbosity;
 }
 
+// Sources that support the reasoning_content field in messages
+const reasoningContentSources = [
+    chat_completion_sources.OPENROUTER,
+    chat_completion_sources.CUSTOM,
+    chat_completion_sources.XAI,
+    chat_completion_sources.AIMLAPI,
+    chat_completion_sources.POLLINATIONS,
+    chat_completion_sources.MOONSHOT,
+    chat_completion_sources.COMETAPI,
+    chat_completion_sources.CHUTES,
+    chat_completion_sources.ELECTRONHUB,
+    chat_completion_sources.NANOGPT,
+    chat_completion_sources.SILICONFLOW,
+    chat_completion_sources.ZAI,
+    chat_completion_sources.WORKERS_AI,
+    chat_completion_sources.DEEPSEEK,
+];
+
+/**
+ * Converts the reasoning blocks of assistant messages that start with the reasoning prefix into the
+ * reasoning_content field, instead of embedding them into the message content with the prefix/suffix
+ * from the Reasoning Formatting settings. This applies to all assistant messages in the prompt,
+ * e.g. { content: '<think>Thought</think>Reply' } -> { reasoning_content: 'Thought', content: 'Reply' },
+ * including the trailing assistant prefill, e.g. { content: '<think>Thought' } -> { reasoning_content: 'Thought' }.
+ * @param {object[]} messages Array of chat completion messages
+ * @returns {object[]} Array of chat completion messages with the reasoning blocks converted, if applicable
+ */
+export function convertReasoningMessages(messages) {
+    const reasoningPrefix = substituteParams(power_user.reasoning.prefix || '');
+
+    if (!reasoningPrefix || !Array.isArray(messages) || !messages.length) {
+        return messages;
+    }
+
+    const reasoningSuffix = substituteParams(power_user.reasoning.suffix || '');
+    const reasoningSeparator = substituteParams(power_user.reasoning.separator || '');
+
+    return messages.map((message, index) => {
+        // Only plain text assistant messages without tool calls can be converted
+        if (message?.role !== 'assistant' || typeof message.content !== 'string' || message.tool_calls) {
+            return message;
+        }
+
+        if (!message.content.startsWith(reasoningPrefix)) {
+            return message;
+        }
+
+        const isLastMessage = index === messages.length - 1;
+        const afterPrefix = message.content.slice(reasoningPrefix.length);
+        const suffixIndex = reasoningSuffix ? afterPrefix.indexOf(reasoningSuffix) : -1;
+        const convertedMessage = { ...message };
+
+        if (suffixIndex === -1) {
+            // Incomplete reasoning block: the whole content is an unfinished thought,
+            // e.g. { content: '<think>Let\'s me think' } -> { reasoning_content: 'Let\'s me think' }
+            convertedMessage.reasoning_content = afterPrefix;
+            // A trailing assistant message is a prefill, so it can be sent without any content at all
+            if (isLastMessage) {
+                delete convertedMessage.content;
+            } else {
+                convertedMessage.content = '';
+            }
+        } else {
+            // Complete reasoning block: split the thought from the remaining content
+            convertedMessage.reasoning_content = afterPrefix.slice(0, suffixIndex);
+            let content = afterPrefix.slice(suffixIndex + reasoningSuffix.length);
+            if (reasoningSeparator && content.startsWith(reasoningSeparator)) {
+                content = content.slice(reasoningSeparator.length);
+            }
+            convertedMessage.content = content;
+        }
+
+        return convertedMessage;
+    });
+}
+
 /**
  * Build the generation parameter object for an OAI request.
  * @param {ChatCompletionSettings} settings Initial chat completion settings
@@ -2729,6 +2807,11 @@ export async function createGenerationParameters(settings, model, type, messages
             const content = message.content.filter(block => block?.type !== 'image_url');
             return content.length > 0 ? [{ ...message, content }] : [];
         });
+    }
+
+    // Send reasoning blocks of assistant messages (including prefills) in the reasoning_content field
+    if (settings.send_reasoning_content && reasoningContentSources.includes(settings.chat_completion_source)) {
+        messages = convertReasoningMessages(messages);
     }
 
     // "OpenAI-like" sources
@@ -7104,6 +7187,11 @@ export function initOpenAI() {
 
     $('#continue_prefill').on('input', function () {
         oai_settings.continue_prefill = !!$(this).prop('checked');
+        saveSettingsDebounced();
+    });
+
+    $('#openai_send_reasoning_content').on('input', function () {
+        oai_settings.send_reasoning_content = !!$(this).prop('checked');
         saveSettingsDebounced();
     });
 

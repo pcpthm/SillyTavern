@@ -239,6 +239,7 @@
     "media_inlining": true,
     "bypass_status_check": false,
     "continue_prefill": false,
+    "send_reasoning_content": false,
     "continue_postfix": " ",
     "seed": -1,
     "n": 1
