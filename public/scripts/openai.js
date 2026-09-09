@@ -2231,12 +2231,24 @@ function saveModelList(data) {
     }
 
     if (oai_settings.chat_completion_source == chat_completion_sources.DEEPSEEK) {
+        // Unlisted models that are not returned by the API must be added manually
+        const manualModels = ['deepseek-v4.1-flash-expires-on-0910'];
         $('#model_deepseek_select').empty();
         model_list.forEach((model) => {
             $('#model_deepseek_select').append($('<option>', { value: model.id, text: model.id }));
         });
+        for (const manualId of manualModels) {
+            if (!model_list.some(model => model.id === manualId)) {
+                $('#model_deepseek_select').append($('<option>', { value: manualId, text: manualId }));
+            }
+        }
+        // Preserve the currently selected unlisted model, if any
+        const hasCurrentOption = $('#model_deepseek_select option').toArray().some(opt => opt.value === oai_settings.deepseek_model);
+        if (oai_settings.deepseek_model && !hasCurrentOption) {
+            $('#model_deepseek_select').append($('<option>', { value: oai_settings.deepseek_model, text: oai_settings.deepseek_model }));
+        }
 
-        const selectedModel = model_list.find(model => model.id === oai_settings.deepseek_model);
+        const selectedModel = model_list.find(model => model.id === oai_settings.deepseek_model) || manualModels.includes(oai_settings.deepseek_model);
         if (model_list.length > 0 && (!selectedModel || !oai_settings.deepseek_model)) {
             oai_settings.deepseek_model = model_list[0].id;
         }
