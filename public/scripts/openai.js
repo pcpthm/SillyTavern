@@ -2589,6 +2589,7 @@ function getReasoningEffort(settings = null, model = null) {
         chat_completion_sources.CHUTES,
         chat_completion_sources.DEEPSEEK,
         chat_completion_sources.FIREWORKS,
+        chat_completion_sources.MISTRALAI,
     ];
 
     if (!reasoningEffortSources.includes(settings.chat_completion_source)) {
@@ -2616,6 +2617,19 @@ function getReasoningEffort(settings = null, model = null) {
                     return undefined;
                 case reasoning_effort_types.min:
                     return reasoning_effort_types.low;
+                default:
+                    return settings.reasoning_effort;
+            }
+        }
+
+        if (settings.chat_completion_source === chat_completion_sources.MISTRALAI) {
+            switch (settings.reasoning_effort) {
+                case reasoning_effort_types.auto:
+                    return undefined;
+                case reasoning_effort_types.min:
+                    return 'minimal';
+                case reasoning_effort_types.max:
+                    return 'xhigh';
                 default:
                     return settings.reasoning_effort;
             }
